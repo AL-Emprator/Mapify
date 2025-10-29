@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:colorBackground"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/text_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hauptmenü"
+            android:textStyle="bold"
+            android:textSize="28sp"
+            android:textColor="?android:textColorPrimary"
+            android:paddingBottom="16dp"/>
+
+        <!-- Card mit Liste der Sensoren -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardUseCompatPadding="true"
+            app:cardElevation="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/divider_list"
+                android:showDividers="middle">
+
+                <!-- Standort -->
+                <LinearLayout
+                    android:id="@+id/row_location"
+                    style="@style/DashboardRowStyle"
+                    android:contentDescription="Standort">
+                    <ImageView
+                        style="@style/DashboardRowIconStyle"
+                        android:src="@drawable/ic_location"/>
+                    <TextView
+                        style="@style/DashboardRowTextStyle"
+                        android:text="Standort"/>
+                    <ImageView
+                        style="@style/DashboardRowChevronStyle"
+                        android:src="@drawable/ic_chevron_right"/>
+                </LinearLayout>
+
+                <!-- Beschleunigung -->
+                <LinearLayout
+                    android:id="@+id/row_accel"
+                    style="@style/DashboardRowStyle"
+                    android:contentDescription="Beschleunigung">
+                    <ImageView
+                        style="@style/DashboardRowIconStyle"
+                      />
+                    <TextView
+                        style="@style/DashboardRowTextStyle"
+                        android:text="Beschleunigung"/>
+                    <ImageView
+                        style="@style/DashboardRowChevronStyle"
+                        android:src="@drawable/ic_chevron_right"/>
+                </LinearLayout>
+
+                <!-- Gyroskop -->
+                <LinearLayout
+                    android:id="@+id/row_gyro"
+                    style="@style/DashboardRowStyle">
+                    <ImageView
+                        style="@style/DashboardRowIconStyle"
+
+                        />
+                    <TextView
+                        style="@style/DashboardRowTextStyle"
+                        android:text="Gyroskop"/>
+                    <ImageView
+                        style="@style/DashboardRowChevronStyle"
+                        android:src="@drawable/ic_chevron_right"/>
+                </LinearLayout>
+
+                <!-- Magnetometer -->
+                <LinearLayout
+                    android:id="@+id/row_mag"
+                    style="@style/DashboardRowStyle">
+                    <ImageView
+                        style="@style/DashboardRowIconStyle"/>
+
+                    <TextView
+                        style="@style/DashboardRowTextStyle"
+                        android:text="Magnetometer"/>
+                    <ImageView
+                        style="@style/DashboardRowChevronStyle"
+                        android:src="@drawable/ic_chevron_right"/>
+                </LinearLayout>
+
+
+
+                <!-- Einstellungen -->
+                <LinearLayout
+                    android:id="@+id/row_settings"
+                    style="@style/DashboardRowStyle">
+                    <ImageView
+                        style="@style/DashboardRowIconStyle"
+                        />
+                    <TextView
+                        style="@style/DashboardRowTextStyle"
+                        android:text="Einstellungen"/>
+                    <ImageView
+                        style="@style/DashboardRowChevronStyle"
+                        android:src="@drawable/ic_chevron_right"/>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</ScrollView>

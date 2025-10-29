@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_nav_graph"
+    app:startDestination="@id/nav_dashboard">
+
+    <!-- Dashboard Fragment -->
+    <fragment
+        android:id="@+id/nav_dashboard"
+        android:name="com.app.sensorlogger.ui.DashboardFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_dashboard" />
+
+    <!-- Map Fragment -->
+    <fragment
+        android:id="@+id/nav_map"
+        android:name="com.app.sensorlogger.ui.MapFragment"
+        android:label="Karte"
+        tools:layout="@layout/fragment_map" />
+
+    <!-- Settings Fragment -->
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.app.sensorlogger.ui.SettingsFragment"
+        android:label="Einstellungen"
+        tools:layout="@layout/fragment_settings" />
+
+
+    <!-- 🚀 Neuer Screen: Beschleunigung -->
+    <fragment
+        android:id="@+id/nav_accelerometer"
+        android:name="com.app.sensorlogger.Sensors.AccelerometerFragment"
+        android:label="Beschleunigung"
+        tools:layout="@layout/fragment_accelerometer" />
+
+    <fragment
+        android:id="@+id/nav_magnetometer"
+        android:name="com.app.sensorlogger.Sensors.MagnetometerFragment"
+        android:label="Magnetfeld"
+        tools:layout="@layout/fragment_magnetometer" />
+
+    <fragment
+        android:id="@+id/nav_gyroscope"
+        android:name="com.app.sensorlogger.Sensors.GyroscopeFragment"
+        android:label="Gyroskop"
+        tools:layout="@layout/fragment_gyroscope" />
+
+
+    <fragment
+        android:id="@+id/nav_location"
+        android:name="com.app.sensorlogger.Sensors.LocationFragment"
+        android:label="Standort"
+        tools:layout="@layout/fragment_location" />
+
+
+</navigation>

@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:colorBackground"
+    android:padding="16dp">
+
+    <!-- Titel -->
+    <TextView
+        android:id="@+id/text_sensor_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Beschleunigung"
+        android:textStyle="bold"
+        android:textSize="28sp"
+        android:textColor="?android:textColorPrimary"
+        android:paddingBottom="16dp"/>
+
+    <!-- Card 1: Live Werte -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardUseCompatPadding="true"
+        app:cardElevation="2dp"
+        android:layout_marginBottom="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:divider="@drawable/divider_list"
+            android:showDividers="middle">
+
+            <!-- X -->
+            <LinearLayout
+                style="@style/DashboardRowStyle">
+                <TextView
+                    android:id="@+id/text_x_value"
+                    style="@style/DashboardRowTextStyle"
+                    android:layout_weight="0"
+                    android:layout_width="wrap_content"
+                    android:text="X-Achse: 0,00000 m/s²"/>
+                <ImageView
+                    style="@style/DashboardRowChevronStyle"
+                    android:src="@drawable/ic_chevron_right"/>
+            </LinearLayout>
+
+            <!-- Y -->
+            <LinearLayout
+                style="@style/DashboardRowStyle">
+                <TextView
+                    android:id="@+id/text_y_value"
+                    style="@style/DashboardRowTextStyle"
+                    android:layout_weight="0"
+                    android:layout_width="wrap_content"
+                    android:text="Y-Achse: 0,00000 m/s²"/>
+                <ImageView
+                    style="@style/DashboardRowChevronStyle"
+                    android:src="@drawable/ic_chevron_right"/>
+            </LinearLayout>
+
+            <!-- Z -->
+            <LinearLayout
+                style="@style/DashboardRowStyle">
+                <TextView
+                    android:id="@+id/text_z_value"
+                    style="@style/DashboardRowTextStyle"
+                    android:layout_weight="0"
+                    android:layout_width="wrap_content"
+                    android:text="Z-Achse: 0,00000 m/s²"/>
+                <ImageView
+                    style="@style/DashboardRowChevronStyle"
+                    android:src="@drawable/ic_chevron_right"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Section Label -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="AKTUALISIERUNGSRATE"
+        android:textAllCaps="true"
+        android:textStyle="bold"
+        android:textSize="12sp"
+        android:textColor="?android:textColorSecondary"
+        android:paddingBottom="8dp"/>
+
+    <!-- Card 2: Aktualisierungsrate / Frequenz -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:cardUseCompatPadding="true">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <!-- Kopfzeile mit Frequenz + Plus/Minus -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingBottom="12dp">
+
+                <TextView
+                    android:id="@+id/text_frequency_label"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Frequenz: 1,0 Hz"
+                    android:textSize="16sp"
+                    android:textColor="?android:textColorPrimary"
+                    android:textStyle="bold"/>
+
+                <ImageButton
+                    android:id="@+id/btn_freq_minus"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:backgroundTint="?attr/colorSurfaceVariant"
+                    android:background="@drawable/bg_round_button"
+                    android:src="@drawable/ic_minus"
+                    android:contentDescription="Minus"
+                    app:tint="?attr/colorOnSurface"/>
+
+                <Space
+                    android:layout_width="8dp"
+                    android:layout_height="0dp"/>
+
+                <ImageButton
+                    android:id="@+id/btn_freq_plus"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:backgroundTint="?attr/colorSurfaceVariant"
+                    android:background="@drawable/bg_round_button"
+                    android:src="@drawable/ic_plus"
+                    android:contentDescription="Plus"
+                    app:tint="?attr/colorOnSurface"/>
+            </LinearLayout>
+
+            <!-- Slider -->
+            <com.google.android.material.slider.Slider
+                android:id="@+id/slider_freq"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:value="1"
+                android:valueFrom="0.1"
+                android:valueTo="5"
+                android:stepSize="0.1"/>
+
+            <!-- Min/Max Beschriftung -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="4dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="0.1"
+                    android:textSize="12sp"
+                    android:textColor="?android:textColorSecondary"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5"
+                    android:textSize="12sp"
+                    android:textColor="?android:textColorSecondary"/>
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Spacer damit die Control-Bar unten bleibt -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/bottom_control_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="25dp"
+            android:paddingBottom="30dp">
+
+            <ImageButton
+                android:id="@+id/btn_record"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Start Logging"
+                android:src="@drawable/ic_record"
+                app:tint="?attr/colorPrimary" />
+
+            <ImageButton
+                android:id="@+id/btn_pause"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Pause Logging"
+                android:src="@drawable/ic_pause"
+                app:tint="?attr/colorPrimary" />
+
+            <ImageButton
+                android:id="@+id/btn_export"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Export"
+                android:src="@drawable/ic_export"
+                app:tint="?attr/colorPrimary" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Bottom control bar -->
+
+</LinearLayout>

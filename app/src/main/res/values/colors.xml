@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+
+        <!-- Hauptfarben deiner App -->
+        <color name="colorPrimary">#1E88E5</color>        <!-- Blau -->
+        <color name="colorPrimaryVariant">#1565C0</color>
+        <color name="colorSecondary">#03DAC5</color>
+        <color name="colorAccent">#03DAC5</color>
+
+        <!-- Oberfläche -->
+        <color name="colorBackground">#FFFFFFFF</color>
+        <color name="colorSurface">#FFFFFF</color>
+        <color name="colorSurfaceVariant">#F5F5F5</color>
+        <color name="colorOnSurface">#000000</color>
+
+        <!-- Textfarben -->
+        <color name="textPrimary">#212121</color>
+        <color name="textSecondary">#757575</color>
+
+        <!-- Bottom Navigation -->
+        <color name="nav_selected">#1E88E5</color>
+        <color name="nav_unselected">#808080</color>
+
+
+
+
+
+
+
+</resources>

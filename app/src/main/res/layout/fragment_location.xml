@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:colorBackground"
+    android:padding="16dp">
+
+    <!-- Titel -->
+    <TextView
+        android:id="@+id/text_sensor_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Standort"
+        android:textStyle="bold"
+        android:textSize="28sp"
+        android:textColor="?android:textColorPrimary"
+        android:paddingBottom="16dp"/>
+
+    <!-- Card: Standortdaten -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardUseCompatPadding="true"
+        app:cardElevation="2dp"
+        android:layout_marginBottom="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:divider="@drawable/divider_list"
+            android:showDividers="middle">
+
+            <!-- Längengrad -->
+            <LinearLayout style="@style/DashboardRowStyle">
+                <TextView
+                    android:id="@+id/textlat"
+                    style="@style/DashboardRowTextStyle"
+                    android:text="Breite: --"/>
+                <ImageView
+                    style="@style/DashboardRowChevronStyle"
+                    android:src="@drawable/ic_chevron_right"/>
+            </LinearLayout>
+
+            <!-- Breitengrad -->
+            <LinearLayout style="@style/DashboardRowStyle">
+                <TextView
+                    android:id="@+id/textlng"
+                    style="@style/DashboardRowTextStyle"
+                    android:text="Länge: --"/>
+                <ImageView
+                    style="@style/DashboardRowChevronStyle"
+                    android:src="@drawable/ic_chevron_right"/>
+            </LinearLayout>
+
+            <!-- Höhe -->
+            <LinearLayout style="@style/DashboardRowStyle">
+                <TextView
+                    android:id="@+id/textalt"
+                    style="@style/DashboardRowTextStyle"
+                    android:text="Höhe: -- m"/>
+                <ImageView
+                    style="@style/DashboardRowChevronStyle"
+                    android:src="@drawable/ic_chevron_right"/>
+            </LinearLayout>
+
+            <!-- Genauigkeit -->
+            <LinearLayout style="@style/DashboardRowStyle">
+                <TextView
+                    android:id="@+id/textacc"
+                    style="@style/DashboardRowTextStyle"
+                    android:text="Genauigkeit: -- m"/>
+                <ImageView
+                    style="@style/DashboardRowChevronStyle"
+                    android:src="@drawable/ic_chevron_right"/>
+            </LinearLayout>
+
+            <!-- Provider -->
+            <LinearLayout style="@style/DashboardRowStyle">
+                <TextView
+                    android:id="@+id/textprovider"
+                    style="@style/DashboardRowTextStyle"
+                    android:text="Provider: --"/>
+                <ImageView
+                    style="@style/DashboardRowChevronStyle"
+                    android:src="@drawable/ic_chevron_right"/>
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Info-Section -->
+    <TextView
+        android:id="@+id/textstatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status: noch keine Daten"
+        android:textColor="?android:textColorSecondary"
+        android:textSize="14sp"
+        android:paddingBottom="8dp"/>
+
+    <!-- Spacer damit Buttons unten kleben -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:id="@+id/bottom_control_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/btn_record"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Start Logging"
+                android:src="@drawable/ic_record"
+                app:tint="?attr/colorPrimary" />
+
+            <ImageButton
+                android:id="@+id/btn_pause"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Pause Logging"
+                android:src="@drawable/ic_pause"
+                app:tint="?attr/colorPrimary" />
+
+            <ImageButton
+                android:id="@+id/btn_export"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="Export"
+                android:src="@drawable/ic_export"
+                app:tint="?attr/colorPrimary" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Bottom control bar -->
+
+</LinearLayout>

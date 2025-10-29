@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:colorBackground"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Titel -->
+        <TextView
+            android:id="@+id/text_settings_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Einstellungen"
+            android:textStyle="bold"
+            android:textSize="28sp"
+            android:textColor="?android:textColorPrimary"
+            android:paddingBottom="16dp"/>
+
+        <!-- Sektion: Aufzeichnung -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AUFZEICHNUNG"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:textColor="?android:textColorSecondary"
+            android:paddingBottom="8dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/divider_list"
+                android:showDividers="middle">
+
+                <!-- Standard-Samplingrate -->
+                <LinearLayout
+                    android:id="@+id/row_default_rate"
+                    style="@style/DashboardRowStyle">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/text_default_rate_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Standard-Samplingrate"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="?android:textColorPrimary"/>
+
+                        <TextView
+                            android:id="@+id/text_default_rate_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="1.0 Hz"
+                            android:textSize="14sp"
+                            android:textColor="?android:textColorSecondary"/>
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/DashboardRowChevronStyle"
+                        android:src="@drawable/ic_chevron_right"/>
+                </LinearLayout>
+
+                <!-- Automatisch aufnehmen -->
+                <LinearLayout
+                    android:id="@+id/row_autostart"
+                    style="@style/DashboardRowStyle">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/text_autostart_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Automatisch aufnehmen"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="?android:textColorPrimary"/>
+
+                        <TextView
+                            android:id="@+id/text_autostart_desc"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Starte Logging sofort nach 'Record'"
+                            android:textSize="14sp"
+                            android:textColor="?android:textColorSecondary"/>
+                    </LinearLayout>
+
+                    <Switch
+                        android:id="@+id/switch_autostart_logging"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <!-- Maximale Aufnahmedauer -->
+                <LinearLayout
+                    android:id="@+id/row_max_session"
+                    style="@style/DashboardRowStyle">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/text_max_session_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Maximale Aufnahmedauer"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:textColor="?android:textColorPrimary"/>
+
+                        <TextView
+                            android:id="@+id/text_max_session_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Unbegrenzt"
+                            android:textSize="14sp"
+                            android:textColor="?android:textColorSecondary"/>
+                    </LinearLayout>
+
+                    <ImageView
+                        style="@style/DashboardRowChevronStyle"
+                        android:src="@drawable/ic_chevron_right"/>
+                </LinearLayout>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+
+        <!-- Sektion: Allgemein -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ALLGEMEIN"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:textColor="?android:textColorSecondary"
+            android:paddingBottom="8dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:divider="@drawable/divider_list"
+                android:showDividers="middle">
+
+                <!-- Release Notes anzeigen -->
+                <LinearLayout
+                    style="@style/DashboardRowStyle">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/DashboardRowTextStyle"
+                            android:layout_width="199dp"
+                            android:text="Release Notes anzeigen"
+                            android:textColor="?android:textColorPrimary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sensor-Logger App"
+                            android:textSize="14sp"
+                            android:textColor="?android:textColorSecondary"/>
+                    </LinearLayout>
+
+                    <Switch
+                        android:id="@+id/switch_release_notes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Sektion: Speichern (Cloud / CSV / JSON) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="DATENSPEICHERUNG"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:textColor="?android:textColorSecondary"
+            android:paddingBottom="8dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardUseCompatPadding="true"
+            android:layout_marginBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Speicherziel"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="?android:textColorPrimary"
+                    android:paddingBottom="12dp"/>
+
+                <RadioGroup
+                    android:id="@+id/radio_storage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/radio_cloud"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Cloud (Server / REST / MQTT)"
+                        android:paddingBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_csv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="CSV Datei lokal speichern"
+                        android:paddingBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_json"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="JSON Datei lokal speichern"/>
+                </RadioGroup>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+
+</ScrollView>
