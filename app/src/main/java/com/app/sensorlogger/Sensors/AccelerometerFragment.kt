@@ -22,12 +22,24 @@ import java.util.Locale
 
 class AccelerometerFragment : Fragment(), SensorEventListener {
 
+    data class SensorSample(
+        val timestamp: String,
+        val x: Float,
+        val y: Float,
+        val z: Float
+    )
+
+
     private var sensorManager: SensorManager? = null
     private var accelerometer: Sensor? = null
 
     private lateinit var textX: TextView
     private lateinit var textY: TextView
     private lateinit var textZ: TextView
+
+    private lateinit var textviewx: TextView
+    private lateinit var textviewy: TextView
+    private lateinit var textviewz: TextView
     private lateinit var freqLabel: TextView
     private lateinit var slider: Slider
     private lateinit var minusBtn: ImageButton
@@ -46,7 +58,7 @@ class AccelerometerFragment : Fragment(), SensorEventListener {
 
 
     // --- Datenliste ---
-    private val loggedData = mutableListOf<Triple<Float, Float, Float>>()
+    private val loggedData = mutableListOf<SensorSample>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,6 +72,11 @@ class AccelerometerFragment : Fragment(), SensorEventListener {
         textX = view.findViewById(R.id.text_x_value)
         textY = view.findViewById(R.id.text_y_value)
         textZ = view.findViewById(R.id.text_z_value)
+
+        textviewx = view.findViewById(R.id.textViewx)
+        textviewy = view.findViewById(R.id.textViewy)
+        textviewz = view.findViewById(R.id.textViewz)
+
         freqLabel = view.findViewById(R.id.text_frequency_label)
         slider = view.findViewById(R.id.slider_freq)
         minusBtn = view.findViewById(R.id.btn_freq_minus)
@@ -211,9 +228,22 @@ class AccelerometerFragment : Fragment(), SensorEventListener {
             textZ.text = String.format("Z-Achse: %.5f m/s²", az)
 
 
-            // Daten speichern, wenn Logging aktiv ist
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
+
+            textviewx.text = String.format(timeStamp)
+            textviewy.text = String.format(timeStamp)
+            textviewz.text = String.format(timeStamp)
+
+            // Daten speichern, wenn Logging aktiv ist Mit timestamp
             if (isLogging) {
-                loggedData.add(Triple(ax, ay, az))
+                loggedData.add(
+                    SensorSample(
+                        timestamp = timeStamp,
+                        x = ax,
+                        y = ay,
+                        z = az
+                    )
+                )
             }
 
         }
@@ -264,10 +294,13 @@ class AccelerometerFragment : Fragment(), SensorEventListener {
 
         try {
             FileWriter(file).use { writer ->
-                writer.append("X,Y,Z\n")
-                for ((x, y, z) in loggedData) {
-                    writer.append("$x,$y,$z\n")
+                writer.append("timestamp,x,y,z\n")
+                for (sample in loggedData) {
+                    writer.append(
+                        "${sample.timestamp},${sample.x},${sample.y},${sample.z}\n"
+                    )
                 }
+
             }
 
             Toast.makeText(requireContext(), "Exportiert nach: ${file.name}", Toast.LENGTH_LONG).show()

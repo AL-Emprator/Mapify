@@ -42,6 +42,13 @@
                 <ImageView
                     style="@style/DashboardRowChevronStyle"
                     android:src="@drawable/ic_chevron_right"/>
+
+                <TextView
+                    android:id="@+id/textViewx"
+                    style="@style/DashboardRowTextStyle"
+                    android:text="TextView" />
+
+
             </LinearLayout>
 
             <LinearLayout style="@style/DashboardRowStyle">
@@ -52,6 +59,12 @@
                 <ImageView
                     style="@style/DashboardRowChevronStyle"
                     android:src="@drawable/ic_chevron_right"/>
+
+                <TextView
+                    android:id="@+id/textViewy"
+                    style="@style/DashboardRowTextStyle"
+                    android:text="TextView" />
+
             </LinearLayout>
 
             <LinearLayout style="@style/DashboardRowStyle">
@@ -62,6 +75,13 @@
                 <ImageView
                     style="@style/DashboardRowChevronStyle"
                     android:src="@drawable/ic_chevron_right"/>
+
+                <TextView
+                    android:id="@+id/textViewz"
+                    style="@style/DashboardRowTextStyle"
+                    android:text="TextView" />
+
+
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

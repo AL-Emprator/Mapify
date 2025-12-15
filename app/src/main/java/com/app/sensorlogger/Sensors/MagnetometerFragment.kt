@@ -15,6 +15,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.app.sensorlogger.R
+import com.app.sensorlogger.Sensors.GyroscopeFragment.SensorSample
 import com.google.android.material.slider.Slider
 import java.io.File
 import java.io.FileWriter
@@ -25,6 +26,12 @@ import kotlin.math.round
 
 class MagnetometerFragment : Fragment(), SensorEventListener {
 
+    data class SensorSample(
+        val timestamp: String,
+        val x: Float,
+        val y: Float,
+        val z: Float
+    )
 
     private var sensorManager: SensorManager? = null
     private var magnetometer: Sensor? = null
@@ -32,6 +39,11 @@ class MagnetometerFragment : Fragment(), SensorEventListener {
     private lateinit var textX: TextView
     private lateinit var textY: TextView
     private lateinit var textZ: TextView
+
+    private lateinit var textviewx: TextView
+    private lateinit var textviewy: TextView
+    private lateinit var textviewz: TextView
+
     private lateinit var freqLabel: TextView
     private lateinit var slider: Slider
     private lateinit var minusBtn: ImageButton
@@ -43,7 +55,7 @@ class MagnetometerFragment : Fragment(), SensorEventListener {
     private var currentFreqHz = 1.0f
     private var lastUpdateTimeMs = 0L
     private var isLogging = false
-    private val loggedData = mutableListOf<Triple<Float, Float, Float>>()
+    private val loggedData = mutableListOf<SensorSample>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -54,6 +66,11 @@ class MagnetometerFragment : Fragment(), SensorEventListener {
         textX = view.findViewById(R.id.text_x_value)
         textY = view.findViewById(R.id.text_y_value)
         textZ = view.findViewById(R.id.text_z_value)
+
+        textviewx = view.findViewById(R.id.textViewx)
+        textviewy = view.findViewById(R.id.textViewy)
+        textviewz = view.findViewById(R.id.textViewz)
+
         freqLabel = view.findViewById(R.id.text_frequency_label)
         slider = view.findViewById(R.id.slider_freq)
         minusBtn = view.findViewById(R.id.btn_freq_minus)
@@ -190,7 +207,26 @@ class MagnetometerFragment : Fragment(), SensorEventListener {
         textY.text = String.format("Y-Achse: %.3f µT", my)
         textZ.text = String.format("Z-Achse: %.3f µT", mz)
 
-        loggedData.add(Triple(mx, my, mz))
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
+
+        textviewx.text = String.format(timeStamp)
+        textviewy.text = String.format(timeStamp)
+        textviewz.text = String.format(timeStamp)
+
+
+        // Daten speichern, wenn Logging aktiv ist Mit timestamp
+        if (isLogging) {
+            loggedData.add(
+                SensorSample(
+                    timestamp = timeStamp,
+                    x = mx,
+                    y = my,
+                    z = mz
+                )
+            )
+        }
+
+
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -231,8 +267,13 @@ class MagnetometerFragment : Fragment(), SensorEventListener {
 
         try {
             FileWriter(file).use { writer ->
-                writer.append("X,Y,Z\n")
-                for ((x, y, z) in loggedData) writer.append("$x,$y,$z\n")
+                writer.append("timestamp,x,y,z\n")
+                for (sample in loggedData) {
+                    writer.append(
+                        "${sample.timestamp},${sample.x},${sample.y},${sample.z}\n"
+                    )
+                }
+
             }
             Toast.makeText(requireContext(), "Exportiert: ${file.name}", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {

@@ -36,6 +36,12 @@ class LocationFragment : Fragment() {
     private lateinit var textLng: TextView
     private lateinit var textAlt: TextView
     private lateinit var textAcc: TextView
+
+    private lateinit var textviewb: TextView
+    private lateinit var textviewl: TextView
+    private lateinit var textviewh: TextView
+    private lateinit var textviewg: TextView
+
     private lateinit var textProvider: TextView
     private lateinit var textStatus: TextView
 
@@ -61,8 +67,10 @@ class LocationFragment : Fragment() {
         override fun onLocationResult(result: LocationResult) {
             val loc = result.lastLocation ?: return
             updateUiWithLocation(loc)
+
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
             if (isLogging) {
-                loggedLocations.add(loc)
+              loggedLocations.add(loc)
             }
         }
     }
@@ -80,6 +88,11 @@ class LocationFragment : Fragment() {
         textAcc = view.findViewById(R.id.textacc)
         textProvider = view.findViewById(R.id.textprovider)
         textStatus = view.findViewById(R.id.textstatus)
+
+       textviewb = view.findViewById(R.id.textViewb)
+       textviewl = view.findViewById(R.id.textViewl)
+       textviewh = view.findViewById(R.id.textViewh)
+       textviewg = view.findViewById(R.id.textViewg)
 
         btnRecord = view.findViewById(R.id.btn_record)
         btnPause = view.findViewById(R.id.btn_pause)
@@ -175,6 +188,12 @@ class LocationFragment : Fragment() {
         textProvider.text = "Provider: fused"
 
         textStatus.text = "Status: Standort empfangen"
+
+        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
+        textviewb.text = String.format(timeStamp);
+        textviewl.text = String.format(timeStamp);
+        textviewh.text = String.format(timeStamp);
+        textviewg.text = String.format(timeStamp);
     }
 
     // Startet kontinuierliche Updates mit FusedLocationProvider
@@ -247,6 +266,8 @@ class LocationFragment : Fragment() {
         try {
             FileWriter(file).use { writer ->
                 writer.append("timestamp,lat,lng,alt,acc\n")
+
+
                 for (loc in loggedLocations) {
                     val t = loc.time
                     val la = loc.latitude
@@ -255,7 +276,17 @@ class LocationFragment : Fragment() {
                     val ac = if (loc.hasAccuracy()) loc.accuracy else Float.NaN
                     writer.append("$t,$la,$lo,$al,$ac\n")
                 }
+
+
+
             }
+
+            Toast.makeText(
+                requireContext(),
+                "GPS-Daten exportiert: ${file.name}",
+                Toast.LENGTH_LONG
+            ).show()
+
 
             return file
         } catch (e: Exception) {
