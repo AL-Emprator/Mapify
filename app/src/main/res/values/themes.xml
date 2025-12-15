@@ -1,13 +1,15 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Base.Theme.SensorLogger" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+    <!-- Base application theme -->
+    <style name="Base.Theme.SensorLogger"
+        parent="Theme.Material3.DayNight.NoActionBar">
     </style>
 
-    <style name="Theme.SensorLogger" parent="Base.Theme.SensorLogger" />
+    <!-- Normal app theme -->
+    <style name="Theme.SensorLogger"
+        parent="Base.Theme.SensorLogger" />
 
-
+    <!-- Dashboard styles -->
     <style name="DashboardRowStyle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">48dp</item>
@@ -38,6 +40,7 @@
         <item name="android:layout_height">20dp</item>
         <item name="android:tint">?android:textColorSecondary</item>
     </style>
+
 
 
 </resources>

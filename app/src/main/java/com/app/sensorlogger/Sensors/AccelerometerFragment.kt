@@ -93,7 +93,7 @@ class AccelerometerFragment : Fragment(), SensorEventListener {
         // Slider Listener
         slider.addOnChangeListener { _, value, _ ->
             currentFreqHz = value
-            updateFreqLabel()
+            updateFreqLabel() //für + und -
             prefs.edit().putFloat("default_sampling_rate", value).apply()
         }
 
@@ -165,9 +165,12 @@ class AccelerometerFragment : Fragment(), SensorEventListener {
         return view
     }
 
+
+    //für slider
     private fun updateFreqLabel() {
         freqLabel.text = "Frequenz: ${String.format("%.1f", currentFreqHz)} Hz"
     }
+
 
     // === Sensor Lifecycle ===
     override fun onResume() {
