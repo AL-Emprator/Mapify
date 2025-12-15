@@ -228,7 +228,10 @@ class AccelerometerFragment : Fragment(), SensorEventListener {
             textZ.text = String.format("Z-Achse: %.5f m/s²", az)
 
 
-            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
+          //  val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
+
+            val timeStamp = SimpleDateFormat("yyyy:MM:dd:HH:mm:ss", Locale.getDefault())
+                .format(System.currentTimeMillis())
 
             textviewx.text = String.format(timeStamp)
             textviewy.text = String.format(timeStamp)

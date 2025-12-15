@@ -4,13 +4,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:background="?android:colorBackground"
     android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="96dp"
+        >
 
         <!-- Titel -->
         <TextView
@@ -156,67 +159,7 @@
         </com.google.android.material.card.MaterialCardView>
 
 
-        <!-- Sektion: Allgemein -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ALLGEMEIN"
-            android:textAllCaps="true"
-            android:textStyle="bold"
-            android:textSize="12sp"
-            android:textColor="?android:textColorSecondary"
-            android:paddingBottom="8dp"/>
 
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp"
-            app:cardUseCompatPadding="true"
-            android:layout_marginBottom="20dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:divider="@drawable/divider_list"
-                android:showDividers="middle">
-
-                <!-- Release Notes anzeigen -->
-                <LinearLayout
-                    style="@style/DashboardRowStyle">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            style="@style/DashboardRowTextStyle"
-                            android:layout_width="199dp"
-                            android:text="Release Notes anzeigen"
-                            android:textColor="?android:textColorPrimary"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Sensor-Logger App"
-                            android:textSize="14sp"
-                            android:textColor="?android:textColorSecondary"/>
-                    </LinearLayout>
-
-                    <Switch
-                        android:id="@+id/switch_release_notes"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"/>
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
 
         <!-- Sektion: Speichern (Cloud / CSV / JSON) -->
         <TextView
@@ -277,6 +220,70 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="JSON Datei lokal speichern"/>
+                </RadioGroup>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Sektion: Network Provieder -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Posistion Provieder"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:textColor="?android:textColorSecondary"
+            android:paddingBottom="8dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Location Services "
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="?android:textColorPrimary"
+                    android:paddingBottom="12dp"/>
+
+                <RadioGroup
+                    android:id="@+id/radio_provider"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    >
+
+                    <RadioButton
+                        android:id="@+id/radio_fused"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="FusedLocationProvider"
+                        android:paddingBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_gps"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="GPS "
+                        android:paddingBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_netz"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Netzwerk "/>
                 </RadioGroup>
 
             </LinearLayout>

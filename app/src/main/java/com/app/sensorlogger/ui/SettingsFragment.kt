@@ -22,6 +22,11 @@ class SettingsFragment : Fragment() {
     private lateinit var radioCsv: RadioButton
     private lateinit var radioJson: RadioButton
 
+    private lateinit var radioGroupProvider: RadioGroup
+    private lateinit var radiofused: RadioButton
+    private lateinit var radiogps: RadioButton
+    private lateinit var radionetz: RadioButton
+
     private lateinit var textDefaultRateValue: TextView
     private lateinit var switchAutoStart: Switch
     private lateinit var textMaxSessionValue: TextView
@@ -31,8 +36,10 @@ class SettingsFragment : Fragment() {
     private val PREFS_NAME = "sensorlogger_prefs"
 
     // Keys für gespeicherte Werte
-    private val KEY_SHOW_RELEASE_NOTES = "show_release_notes"
+    //private val KEY_SHOW_RELEASE_NOTES = "show_release_notes"
     private val KEY_STORAGE_MODE = "storage_mode"
+
+    private val KEY_PROVIEDER_MODE = "provieder_mode"
 
     private val KEY_DEFAULT_RATE = "default_sampling_rate"
     private val KEY_AUTOSTART_LOGGING = "autostart_logging"
@@ -43,6 +50,10 @@ class SettingsFragment : Fragment() {
     private val MODE_CLOUD = "cloud"
     private val MODE_CSV = "csv"
     private val MODE_JSON = "json"
+
+    private val MODE_FUSED = "fused"
+    private val MODE_GPS = "GPS"
+    private val MODE_NETZ = "Netzwerk"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,13 +66,20 @@ class SettingsFragment : Fragment() {
         // --- Views finden (IDs sind genau so wie in deinem Layout) ---
 
         // Allgemein
-        switchReleaseNotes = view.findViewById(R.id.switch_release_notes)
+       // switchReleaseNotes = view.findViewById(R.id.switch_release_notes)
 
         // Datenspeicherung
         radioGroupStorage = view.findViewById(R.id.radio_storage)
         radioCloud = view.findViewById(R.id.radio_cloud)
         radioCsv = view.findViewById(R.id.radio_csv)
         radioJson = view.findViewById(R.id.radio_json)
+
+        //Netzwerk
+        radioGroupProvider = view.findViewById(R.id.radio_provider)
+        radiofused = view.findViewById(R.id.radio_fused)
+        radiogps = view.findViewById(R.id.radio_gps)
+        radionetz = view.findViewById(R.id.radio_netz)
+
 
         // --- Views finden ---
         textDefaultRateValue = view.findViewById(R.id.text_default_rate_value)
@@ -75,8 +93,8 @@ class SettingsFragment : Fragment() {
         // ------- Initialzustand aus Prefs laden -------
 
         // 1. Release Notes switch
-        val showNotes = prefs.getBoolean(KEY_SHOW_RELEASE_NOTES, true)
-        switchReleaseNotes.isChecked = showNotes
+        //val showNotes = prefs.getBoolean(KEY_SHOW_RELEASE_NOTES, true)
+        //switchReleaseNotes.isChecked = showNotes
 
         // 2. Speichermodus (CSV default)
         val storageMode = prefs.getString(KEY_STORAGE_MODE, MODE_CSV)
@@ -86,6 +104,14 @@ class SettingsFragment : Fragment() {
             else -> radioCsv.isChecked = true
         }
 
+
+        //3. Provieder Posistion (FUSED default)
+        val providerMode = prefs.getString(KEY_PROVIEDER_MODE, MODE_FUSED)
+        when(providerMode) {
+            MODE_GPS -> radiogps.isChecked = true
+            MODE_NETZ -> radiogps.isChecked = true
+            else -> radiofused.isChecked = true
+        }
 
         val defaultRate = prefs.getFloat(KEY_DEFAULT_RATE, 1.0f)
         textDefaultRateValue.text = "${defaultRate} Hz"
@@ -100,6 +126,7 @@ class SettingsFragment : Fragment() {
         // ------- Listener zum Speichern -------
 
         // Release Notes anzeigen
+        /*
         switchReleaseNotes.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit()
                 .putBoolean(KEY_SHOW_RELEASE_NOTES, isChecked)
@@ -109,6 +136,8 @@ class SettingsFragment : Fragment() {
                 showReleaseNotesDialog()
             }
         }
+
+         */
 
         // Speichermodus ändern
         radioGroupStorage.setOnCheckedChangeListener { _, checkedId ->
@@ -121,6 +150,23 @@ class SettingsFragment : Fragment() {
             prefs.edit()
                 .putString(KEY_STORAGE_MODE, mode)
                 .apply()
+        }
+
+        //Provider Modus ändern
+        radioGroupProvider.setOnCheckedChangeListener {  _, checkedId ->
+
+            val mode = when (checkedId) {
+
+                R.id.radio_gps -> MODE_GPS
+                R.id.radio_netz -> MODE_NETZ
+                else -> MODE_FUSED
+            }
+
+            prefs.edit()
+                .putString(KEY_PROVIEDER_MODE, mode)
+                .apply()
+
+
         }
 
         switchAutoStart.setOnCheckedChangeListener { _, enabled ->
@@ -179,6 +225,8 @@ class SettingsFragment : Fragment() {
             .show()
     }
 
+
+    /*
     private fun showReleaseNotesDialog() {
         androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle("Release Notes")
@@ -196,6 +244,8 @@ class SettingsFragment : Fragment() {
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .show()
     }
+
+     */
 
 
 }

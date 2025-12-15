@@ -6,8 +6,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.Environment
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,6 +34,17 @@ import java.util.Locale
 import java.util.Date
 
 class LocationFragment : Fragment() {
+
+    data class LocationSample(
+        val timestamp: Long,
+        val latitude: Double,
+        val longitude: Double,
+        val accuracy: Float?,
+        val altitude: Double?
+    )
+
+
+    private lateinit var locationManager: LocationManager
 
     private lateinit var textLat: TextView
     private lateinit var textLng: TextView
@@ -56,26 +70,58 @@ class LocationFragment : Fragment() {
     private var isLogging = false
 
     // hier sammeln wir ALLE GPS-Punkte dieser Session
-    private val loggedLocations = mutableListOf<Location>()
+    private val loggedLocations = mutableListOf<LocationSample>()
 
     // wir merken uns die zuletzt bekannte CSV-Datei,
     // damit MapFragment sie später laden kann
     private var lastExportedFilePath: String? = null
 
-    // Location Callback -> bekommt Updates vom FusedLocationProvider
-    private val callback = object : LocationCallback() {
-        override fun onLocationResult(result: LocationResult) {
-            val loc = result.lastLocation ?: return
-            updateUiWithLocation(loc)
 
-            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(System.currentTimeMillis())
-            if (isLogging) {
-              loggedLocations.add(loc)
-            }
+    private fun handleLocation(loc: Location) {
+
+        updateUiWithLocation(loc)
+
+        if (isLogging) {
+            loggedLocations.add(
+                LocationSample(
+                    timestamp = System.currentTimeMillis(),
+                    latitude = loc.latitude,
+                    longitude = loc.longitude,
+                    accuracy = if (loc.hasAccuracy()) loc.accuracy else null,
+                    altitude = if (loc.hasAltitude()) loc.altitude else null
+                )
+            )
         }
     }
 
-   override fun onCreateView(
+
+    // Location Callback -> bekommt Updates vom FusedLocationProvider
+    private val fusedCallback  = object : LocationCallback() {
+        override fun onLocationResult(result: LocationResult) {
+            val loc = result.lastLocation ?: return
+            handleLocation(loc)
+        }
+    }
+
+    //GPS / NETWORK Provider → LocationListener
+    private val legacyLocationListener = object : LocationListener {
+
+        override fun onLocationChanged(loc: Location) {
+            handleLocation(loc)
+        }
+
+        override fun onProviderDisabled(provider: String) {
+            Toast.makeText(
+                requireContext(),
+                "$provider deaktiviert",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+
+
+    override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -99,8 +145,10 @@ class LocationFragment : Fragment() {
         btnExport = view.findViewById(R.id.btn_export)
 
 
-       // ==== Globale Einstellungen laden ====
-       val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
+       //Für GPS und Netwerk Provieder
+       locationManager = requireContext()
+           .getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
 
 
 
@@ -111,7 +159,7 @@ class LocationFragment : Fragment() {
            if (ensureLocationPermission()) {
                isLogging = true
                loggedLocations.clear()
-               startLocationUpdates()
+               startSelectedProvider()
                textStatus.text = "Status: Tracking läuft…"
                Toast.makeText(requireContext(), "Standort-Logging gestartet", Toast.LENGTH_SHORT).show()
            } else {
@@ -132,7 +180,7 @@ class LocationFragment : Fragment() {
        btnExport.setOnClickListener {
 
 
-          val file = exportToCsv()
+          val file = exportToCsv() //exportData
            if (file != null) {
                lastExportedFilePath = file.absolutePath  // <- jetzt ist file sicher non-null
                Toast.makeText(
@@ -157,7 +205,7 @@ class LocationFragment : Fragment() {
         super.onResume()
         // Falls du willst dass bei Zurückkommen weiter aufgenommen wird:
         if (isLogging && ensureLocationPermission()) {
-            startLocationUpdates()
+            startSelectedProvider()
         }
     }
 
@@ -169,6 +217,8 @@ class LocationFragment : Fragment() {
     // UI aktualisieren
 // Status in der UI aktualisieren
     private fun updateUiWithLocation(loc: android.location.Location) {
+
+
         textLat.text = "Breite: %.6f".format(loc.latitude)
         textLng.text = "Länge: %.6f".format(loc.longitude)
 
@@ -185,7 +235,7 @@ class LocationFragment : Fragment() {
         }
 
         // Fused Provider ist quasi Mischung aus GPS / WLAN / Zelle
-        textProvider.text = "Provider: fused"
+        //textProvider.text = "Provider: fused"
 
         textStatus.text = "Status: Standort empfangen"
 
@@ -198,7 +248,8 @@ class LocationFragment : Fragment() {
 
     // Startet kontinuierliche Updates mit FusedLocationProvider
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
-    private fun startLocationUpdates() {
+
+    private fun startFusedrovider() {
         val req = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             1000L // gewünschtes Intervall ~1 Sekunde
@@ -211,16 +262,100 @@ class LocationFragment : Fragment() {
 
         locationClient.requestLocationUpdates(
             req,
-            callback,
+            fusedCallback ,
             requireActivity().mainLooper
         )
 
-        textStatus.text = "Status: Tracking läuft…"
+
+
+        textProvider.text = "Provider: Fused"
+        textStatus.text = "Status: Fused aktiv"
     }
 
     private fun stopLocationUpdates() {
-        locationClient.removeLocationUpdates(callback)
+        locationClient.removeLocationUpdates(fusedCallback) // Fused
+        locationManager.removeUpdates(legacyLocationListener) // GPS / Netzwerk
+
         textStatus.text = "Status: angehalten"
+    }
+
+
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun startSelectedProvider() {
+
+        val prefs = requireContext()
+            .getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
+
+        val mode = prefs.getString("provieder_mode", "fused")
+
+        stopLocationUpdates() // vorher alles stoppen
+
+        when (mode) {
+            "GPS" -> startGpsProvider()
+            "Netzwerk" -> startNetworkProvider()
+            else -> startFusedrovider()
+        }
+    }
+
+
+
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun startGpsProvider(){
+
+        stopLocationUpdates() // vorher alles stoppen
+
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Toast.makeText(
+                requireContext(),
+                "GPS ist deaktiviert",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        locationManager.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER,
+            1000L,   // 1 Sekunde
+            0f,      // 0 Meter
+            legacyLocationListener
+        )
+
+
+        textProvider.text = "Provider: GPS"
+        textStatus.text = "Status: GPS aktiv"
+
+
+        //Toast.makeText(requireContext(), "startGpsProvider (TODO)", Toast.LENGTH_SHORT).show()
+    }
+
+
+
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    private fun startNetworkProvider(){
+
+
+
+         stopLocationUpdates()
+
+        if (!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            Toast.makeText(requireContext(), "Netzwerk-Provider deaktiviert", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        locationManager.requestLocationUpdates(
+            LocationManager.NETWORK_PROVIDER,
+            1000L,
+            0f,
+            legacyLocationListener
+        )
+
+        textProvider.text = "Provider: Netzwerk"
+        textStatus.text = "Status: Netzwerk aktiv"
+
+        Toast.makeText(requireContext(), "startNetworkProvider (TODO)", Toast.LENGTH_SHORT).show()
     }
 
 
@@ -249,36 +384,47 @@ class LocationFragment : Fragment() {
     // Exportiert geloggte Positionen als CSV
 
     private fun exportToCsv(): File? {
+
         if (loggedLocations.isEmpty()) {
-            Toast.makeText(requireContext(), "Keine GPS-Daten aufgezeichnet", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "Keine GPS-Daten aufgezeichnet",
+                Toast.LENGTH_SHORT
+            ).show()
             return null
         }
 
-        val dir = requireContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
-        if (dir == null) {
-            Toast.makeText(requireContext(), "Kein Speicher verfügbar", Toast.LENGTH_SHORT).show()
-            return null
-        }
+        val dir = requireContext()
+            .getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
+            ?: return null
 
-        val stamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val stamp = SimpleDateFormat(
+            "yyyyMMdd_HHmmss",
+            Locale.getDefault()
+        ).format(System.currentTimeMillis())
+
         val file = File(dir, "locations_$stamp.csv")
 
         try {
             FileWriter(file).use { writer ->
-                writer.append("timestamp,lat,lng,alt,acc\n")
 
+                // CSV Header
+                writer.append("timestamp,latitude,longitude,accuracy,altitude\n")
 
-                for (loc in loggedLocations) {
-                    val t = loc.time
-                    val la = loc.latitude
-                    val lo = loc.longitude
-                    val al = if (loc.hasAltitude()) loc.altitude else Double.NaN
-                    val ac = if (loc.hasAccuracy()) loc.accuracy else Float.NaN
-                    writer.append("$t,$la,$lo,$al,$ac\n")
+                // Daten
+                for (sample in loggedLocations) {
+
+                    val altitudeValue = sample.altitude ?: ""
+                    val accuracyValue = sample.accuracy ?: ""
+
+                    writer.append(
+                        "${sample.timestamp}," +
+                                "${sample.latitude}," +
+                                "${sample.longitude}," +
+                                "$accuracyValue," +
+                                "$altitudeValue\n"
+                    )
                 }
-
-
-
             }
 
             Toast.makeText(
@@ -287,14 +433,18 @@ class LocationFragment : Fragment() {
                 Toast.LENGTH_LONG
             ).show()
 
-
             return file
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Fehler: ${e.message}", Toast.LENGTH_LONG).show()
-        }
 
-        return null
+        } catch (e: Exception) {
+            Toast.makeText(
+                requireContext(),
+                "Fehler beim Export: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
+            return null
+        }
     }
+
 
 
     // Permission-Check (FINE + COARSE)
