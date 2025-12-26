@@ -1,12 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <!-- OSM Map -->
     <org.osmdroid.views.MapView
         android:id="@+id/osm_map"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"/>
+
+    <!-- Wegpunkt speichern (unten links) -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="80dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ImageButton
+            android:id="@+id/btn_waypoint"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_round_button"
+            android:contentDescription="Wegpunkt speichern"
+            android:src="@drawable/ic_location"
+            app:tint="@color/colorAccent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Wegpunkt speichern"
+            android:textSize="12sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="6dp"/>
+    </LinearLayout>
+
+    <!-- Export aktuelle Location (unten rechts) -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="80dp"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <ImageButton
+            android:id="@+id/btn_export"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_round_button"
+            android:contentDescription="Export aktuelle Location"
+            android:src="@drawable/ic_export"
+            app:tint="@color/colorAccent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Export aktuelle Location"
+            android:textSize="12sp"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="6dp"/>
+    </LinearLayout>
 
 </FrameLayout>

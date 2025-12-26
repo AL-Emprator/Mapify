@@ -27,6 +27,8 @@ class SettingsFragment : Fragment() {
     private lateinit var radiogps: RadioButton
     private lateinit var radionetz: RadioButton
 
+    private lateinit var  radioblanced: RadioButton
+
     private lateinit var textDefaultRateValue: TextView
     private lateinit var switchAutoStart: Switch
     private lateinit var textMaxSessionValue: TextView
@@ -53,7 +55,12 @@ class SettingsFragment : Fragment() {
 
     private val MODE_FUSED = "fused"
     private val MODE_GPS = "GPS"
+
+    //Optional
     private val MODE_NETZ = "Netzwerk"
+
+    private val MODE_FUSED_HIGH = "fused_high"
+    private val MODE_FUSED_BALANCED = "fused_balanced"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -76,7 +83,8 @@ class SettingsFragment : Fragment() {
 
         //Netzwerk
         radioGroupProvider = view.findViewById(R.id.radio_provider)
-        radiofused = view.findViewById(R.id.radio_fused)
+        radiofused = view.findViewById(R.id.radio_fused) //high defualt
+        radioblanced = view.findViewById(R.id.radio_balanced)
         radiogps = view.findViewById(R.id.radio_gps)
         radionetz = view.findViewById(R.id.radio_netz)
 
@@ -106,11 +114,12 @@ class SettingsFragment : Fragment() {
 
 
         //3. Provieder Posistion (FUSED default)
-        val providerMode = prefs.getString(KEY_PROVIEDER_MODE, MODE_FUSED)
+        val providerMode = prefs.getString(KEY_PROVIEDER_MODE, MODE_FUSED_HIGH)
         when(providerMode) {
             MODE_GPS -> radiogps.isChecked = true
-            MODE_NETZ -> radiogps.isChecked = true
-            else -> radiofused.isChecked = true
+            MODE_NETZ -> radionetz.isChecked = true
+            MODE_FUSED_BALANCED -> radioblanced.isChecked = true //Balnced
+            else -> radiofused.isChecked = true //High defualt
         }
 
         val defaultRate = prefs.getFloat(KEY_DEFAULT_RATE, 1.0f)
@@ -159,7 +168,8 @@ class SettingsFragment : Fragment() {
 
                 R.id.radio_gps -> MODE_GPS
                 R.id.radio_netz -> MODE_NETZ
-                else -> MODE_FUSED
+                R.id.radio_balanced -> MODE_FUSED_BALANCED
+                else -> MODE_FUSED_HIGH
             }
 
             prefs.edit()

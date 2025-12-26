@@ -269,7 +269,14 @@
                         android:id="@+id/radio_fused"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="FusedLocationProvider"
+                        android:text="FUSED HIGH_ACCURACY"
+                        android:paddingBottom="8dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radio_balanced"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="FUSED BALANCED_POWER"
                         android:paddingBottom="8dp"/>
 
                     <RadioButton

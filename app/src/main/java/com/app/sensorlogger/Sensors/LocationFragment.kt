@@ -22,6 +22,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.app.sensorlogger.R
+import com.app.sensorlogger.data.RunExport
+import com.app.sensorlogger.data.RunManager
+import com.app.sensorlogger.model.LocationSample
+import com.app.sensorlogger.model.ProviderVariant
+import com.app.sensorlogger.model.RouteType
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -35,13 +40,6 @@ import java.util.Date
 
 class LocationFragment : Fragment() {
 
-    data class LocationSample(
-        val timestamp: Long,
-        val latitude: Double,
-        val longitude: Double,
-        val accuracy: Float?,
-        val altitude: Double?
-    )
 
 
     private lateinit var locationManager: LocationManager
@@ -70,7 +68,7 @@ class LocationFragment : Fragment() {
     private var isLogging = false
 
     // hier sammeln wir ALLE GPS-Punkte dieser Session
-    private val loggedLocations = mutableListOf<LocationSample>()
+   // private val loggedLocations = mutableListOf<LocationSample>()
 
     // wir merken uns die zuletzt bekannte CSV-Datei,
     // damit MapFragment sie später laden kann
@@ -82,13 +80,15 @@ class LocationFragment : Fragment() {
         updateUiWithLocation(loc)
 
         if (isLogging) {
-            loggedLocations.add(
+
+            RunManager.addLocation(
                 LocationSample(
                     timestamp = System.currentTimeMillis(),
                     latitude = loc.latitude,
                     longitude = loc.longitude,
                     accuracy = if (loc.hasAccuracy()) loc.accuracy else null,
-                    altitude = if (loc.hasAltitude()) loc.altitude else null
+                    altitude = if (loc.hasAltitude()) loc.altitude else null,
+                    provider = loc.provider ?: ""
                 )
             )
         }
@@ -157,11 +157,30 @@ class LocationFragment : Fragment() {
        btnRecord.setOnClickListener {
            // Permission zuerst prüfen
            if (ensureLocationPermission()) {
+
+              // loggedLocations.clear()
+               //RunManager.clearAll()
+
+               val route = RouteType.OUTDOOR //später dyanmic wählen
+               val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
+               val mode = prefs.getString("provieder_mode", "fused_high")
+               val providerVariant = when (mode) {
+                   "fused_balanced" -> ProviderVariant.FUSED_BALANCED
+                   "GPS" -> ProviderVariant.GPS
+                   "Network" -> ProviderVariant.Network
+                   else -> ProviderVariant.FUSED_HIGH
+               }
+
+
+               val run = RunManager.startNewRun(route, providerVariant)
                isLogging = true
-               loggedLocations.clear()
                startSelectedProvider()
-               textStatus.text = "Status: Tracking läuft…"
-               Toast.makeText(requireContext(), "Standort-Logging gestartet", Toast.LENGTH_SHORT).show()
+
+               textStatus.text = "Status: Run läuft (${run.runId.take(8)})"
+               Toast.makeText(requireContext(), "Run gestartet", Toast.LENGTH_SHORT).show()
+
+
+
            } else {
                // wir haben gerade Permission angefragt -> User muss erst erlauben
                Toast.makeText(requireContext(), "Berechtigung benötigt…", Toast.LENGTH_SHORT).show()
@@ -178,8 +197,24 @@ class LocationFragment : Fragment() {
 
 
        btnExport.setOnClickListener {
+          val run = RunManager.getCurrentRun() ?: RunManager.getRuns().lastOrNull()
 
+           if(run == null){
+               Toast.makeText(requireContext(), "Kein Run vorhanden", Toast.LENGTH_SHORT).show()
+               return@setOnClickListener
+           }
 
+           val result = RunExport.exportRunToCsv(requireContext(), run)
+
+           val msg = buildString {
+               append("Export:\n")
+               append("Locations: ${result.locationsFile?.name ?: "FEHLT"}\n")
+               append("Waypoints: ${result.waypointsFile?.name ?: "FEHLT"}")
+           }
+
+           Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+
+           /*
           val file = exportToCsv() //exportData
            if (file != null) {
                lastExportedFilePath = file.absolutePath  // <- jetzt ist file sicher non-null
@@ -195,6 +230,8 @@ class LocationFragment : Fragment() {
 
                Toast.makeText(requireContext(), "Export fehlgeschlagen", Toast.LENGTH_SHORT).show()
            }
+
+            */
        }
 
         return view
@@ -215,7 +252,7 @@ class LocationFragment : Fragment() {
     }
 
     // UI aktualisieren
-// Status in der UI aktualisieren
+    // Status in der UI aktualisieren
     private fun updateUiWithLocation(loc: android.location.Location) {
 
 
@@ -249,9 +286,11 @@ class LocationFragment : Fragment() {
     // Startet kontinuierliche Updates mit FusedLocationProvider
     @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
 
-    private fun startFusedrovider() {
+    //FusedLocationProvider: HIGH / BALANCED
+
+    private fun startFusedrovider(priority: Int) {
         val req = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY,
+            priority,
             1000L // gewünschtes Intervall ~1 Sekunde
         )
             .setMinUpdateIntervalMillis(500L) // früheste Rate
@@ -268,6 +307,7 @@ class LocationFragment : Fragment() {
 
 
 
+       // if(priority == )
         textProvider.text = "Provider: Fused"
         textStatus.text = "Status: Fused aktiv"
     }
@@ -287,14 +327,15 @@ class LocationFragment : Fragment() {
         val prefs = requireContext()
             .getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
 
-        val mode = prefs.getString("provieder_mode", "fused")
+        val mode = prefs.getString("provieder_mode", "fused_high")
 
         stopLocationUpdates() // vorher alles stoppen
 
         when (mode) {
             "GPS" -> startGpsProvider()
             "Netzwerk" -> startNetworkProvider()
-            else -> startFusedrovider()
+            "fused_balanced" -> startFusedrovider(priority = Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+            else -> startFusedrovider(priority = Priority.PRIORITY_HIGH_ACCURACY)
         }
     }
 
@@ -358,7 +399,7 @@ class LocationFragment : Fragment() {
         Toast.makeText(requireContext(), "startNetworkProvider (TODO)", Toast.LENGTH_SHORT).show()
     }
 
-
+/*
     private fun exportData() {
         val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
         val mode = prefs.getString("storage_mode", "csv")
@@ -381,8 +422,11 @@ class LocationFragment : Fragment() {
     }
 
 
+ */
+
     // Exportiert geloggte Positionen als CSV
 
+    /*
     private fun exportToCsv(): File? {
 
         if (loggedLocations.isEmpty()) {
@@ -447,6 +491,8 @@ class LocationFragment : Fragment() {
 
 
 
+     */
+
     // Permission-Check (FINE + COARSE)
     private fun ensureLocationPermission(): Boolean {
         val ctx = requireContext()
@@ -469,12 +515,15 @@ class LocationFragment : Fragment() {
         }
     }
 
+    /*
     private fun saveLastExportPathForMap(path: String) {
         val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
         prefs.edit()
             .putString("last_gps_csv_path", path)
             .apply()
     }
+
+     */
 
 
 }
