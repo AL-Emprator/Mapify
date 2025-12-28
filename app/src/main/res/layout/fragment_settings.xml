@@ -293,6 +293,67 @@
                         android:text="Netzwerk "/>
                 </RadioGroup>
 
+
+
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+
+        <!-- Sektion: Network Provieder -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Route-Auswahl"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:textColor="?android:textColorSecondary"
+            android:paddingBottom="8dp"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="2dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Route Services "
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:textColor="?android:textColorPrimary"
+                    android:paddingBottom="12dp"/>
+
+                <RadioGroup
+                    android:id="@+id/radio_route"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <RadioButton
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/radio_route_outdoor"
+                        android:text="Outdoor"/>
+
+                    <RadioButton
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/radio_route_indoor"
+                        android:text="Indoor"/>
+                </RadioGroup>
+
+
+
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

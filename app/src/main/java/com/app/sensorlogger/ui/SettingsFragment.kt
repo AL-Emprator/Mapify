@@ -33,6 +33,9 @@ class SettingsFragment : Fragment() {
     private lateinit var switchAutoStart: Switch
     private lateinit var textMaxSessionValue: TextView
 
+    private lateinit var radioGroupRoute: RadioGroup
+    private lateinit var  outdoor_mode: RadioButton
+    private lateinit var  indoor_mode: RadioButton
 
     // Name für SharedPreferences
     private val PREFS_NAME = "sensorlogger_prefs"
@@ -57,10 +60,16 @@ class SettingsFragment : Fragment() {
     private val MODE_GPS = "GPS"
 
     //Optional
-    private val MODE_NETZ = "Netzwerk"
+    private val MODE_NETZ = "Network"
 
     private val MODE_FUSED_HIGH = "fused_high"
     private val MODE_FUSED_BALANCED = "fused_balanced"
+
+    private val KEY_ROUTE_MODE = "route_mode"
+    private val MODE_OUTDOOR = "outdoor"
+    private val MODE_INDOOR = "indoor"
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -88,6 +97,10 @@ class SettingsFragment : Fragment() {
         radiogps = view.findViewById(R.id.radio_gps)
         radionetz = view.findViewById(R.id.radio_netz)
 
+
+        radioGroupRoute = view.findViewById(R.id.radio_route)
+        outdoor_mode = view.findViewById(R.id.radio_route_outdoor)
+        indoor_mode = view.findViewById(R.id.radio_route_indoor)
 
         // --- Views finden ---
         textDefaultRateValue = view.findViewById(R.id.text_default_rate_value)
@@ -120,6 +133,14 @@ class SettingsFragment : Fragment() {
             MODE_NETZ -> radionetz.isChecked = true
             MODE_FUSED_BALANCED -> radioblanced.isChecked = true //Balnced
             else -> radiofused.isChecked = true //High defualt
+        }
+
+
+        val routemode = prefs.getString(KEY_ROUTE_MODE, MODE_OUTDOOR)
+        when(routemode) {
+                MODE_INDOOR -> indoor_mode.isChecked = true
+                else -> outdoor_mode.isChecked = true
+
         }
 
         val defaultRate = prefs.getFloat(KEY_DEFAULT_RATE, 1.0f)
@@ -177,6 +198,18 @@ class SettingsFragment : Fragment() {
                 .apply()
 
 
+        }
+
+        radioGroupRoute.setOnCheckedChangeListener { _, checkedId ->
+
+            val mode = when (checkedId) {
+                R.id.radio_route_indoor -> MODE_INDOOR
+                else -> MODE_OUTDOOR
+            }
+
+            prefs.edit()
+                .putString(KEY_ROUTE_MODE, mode)
+                .apply()
         }
 
         switchAutoStart.setOnCheckedChangeListener { _, enabled ->

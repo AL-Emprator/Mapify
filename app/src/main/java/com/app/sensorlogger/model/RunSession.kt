@@ -3,7 +3,7 @@ package com.app.sensorlogger.model
 import com.app.sensorlogger.Sensors.LocationFragment
 
 enum class RouteType { OUTDOOR, INDOOR }
-enum class ProviderVariant { FUSED_HIGH, FUSED_BALANCED, GPS, Network }
+enum class ProviderVariant { FUSED_HIGH, FUSED_BALANCED, GPS, NETWORK }
 
 data class RunSession (
 

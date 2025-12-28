@@ -35,6 +35,12 @@ import java.io.File
 
 class MapFragment : Fragment() {
 
+    private val sharedVM by lazy {
+        androidx.lifecycle.ViewModelProvider(requireActivity())
+            .get(com.app.sensorlogger.viewmodel.SharedLocationViewModel::class.java)
+    }
+
+
     private lateinit var mapView: MapView
     private lateinit var btnWaypoint: ImageButton
     private lateinit var btnExport: ImageButton
@@ -59,9 +65,12 @@ class MapFragment : Fragment() {
         override fun onLocationResult(result: LocationResult) {
             val loc = result.lastLocation ?: return
             lastLocation = loc
-            updateLiveMarker(loc)
+
+            val p = GeoPoint(loc.latitude, loc.longitude)
+            updateLiveMarker(p)
         }
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -80,6 +89,9 @@ class MapFragment : Fragment() {
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
         mapView.controller.setZoom(18.0)
+
+
+
 
 
         //Test Strecken
@@ -113,11 +125,11 @@ class MapFragment : Fragment() {
 
 
         //TestStrecken
-        drawRoute(route1, android.graphics.Color.BLUE, "Groundtruth Route 1 (Outdoor)")
-        drawMarkers(route1, " O ")
+        //drawRoute(route1, android.graphics.Color.BLUE, "Groundtruth Route 1 (Outdoor)")
+       // drawMarkers(route1, " O ")
 
-        drawRoute(route2Indoor, android.graphics.Color.YELLOW, "Groundtruth Route 2 (Indoor)")
-        drawMarkers(route2Indoor, " I ")
+        //drawRoute(route2Indoor, android.graphics.Color.YELLOW, "Groundtruth Route 2 (Indoor)")
+        //drawMarkers(route2Indoor, " I ")
 
 
         //Wegpunkte poyline bei button
@@ -129,7 +141,7 @@ class MapFragment : Fragment() {
         }
         mapView.overlays.add(waypointLine)
 
-// Bereits vorhandene Waypoints (aus aktuellem Run oder letztem Run) wiederherstellen
+      // Bereits vorhandene Waypoints (aus aktuellem Run oder letztem Run) wiederherstellen
         restoreWaypointsOnMap()
 
         // Route aus letzter exportierter CSV zeichnen von sensoren
@@ -187,8 +199,15 @@ class MapFragment : Fragment() {
             Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
         }
 
+
+        sharedVM.currentLocation.observe(viewLifecycleOwner) { s ->
+            val p = org.osmdroid.util.GeoPoint(s.latitude, s.longitude)
+            updateLiveMarker(p)
+        }
+
         // Permission check (fragt ggf. an)
         ensureLocationPermission()
+
 
         return view
     }
@@ -196,12 +215,13 @@ class MapFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mapView.onResume()
+       // btnWaypoint.isEnabled = RunManager.isRunning()
         startMapLocationUpdates()
     }
 
     override fun onPause() {
         super.onPause()
-        stopMapLocationUpdates()
+        //stopMapLocationUpdates()
         mapView.onPause()
     }
 
@@ -250,27 +270,19 @@ class MapFragment : Fragment() {
             return
         }
 
-        // Wenn noch kein Run aktiv ist -> starte Run (einmalig)
+        // WICHTIG: Waypoints nur speichern, wenn Run läuft
         if (!RunManager.isRunning()) {
-            val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
-
-            val mode = prefs.getString("provieder_mode", "fused_high")
-            val providerVariant = when (mode?.lowercase()) {
-                "fused_balanced" -> ProviderVariant.FUSED_BALANCED
-                "gps" -> ProviderVariant.GPS
-                else -> ProviderVariant.FUSED_HIGH
-            }
-
-            val route = when (prefs.getString("route_mode", "outdoor")?.lowercase()) {
-                "indoor" -> RouteType.INDOOR
-                else -> RouteType.OUTDOOR
-            }
-
-            RunManager.startNewRun(route, providerVariant)
-            Toast.makeText(requireContext(), "Kein Run aktiv → neuer Run gestartet", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Bitte zuerst im Dashboard 'Run' starten.", Toast.LENGTH_SHORT).show()
+            return
         }
 
-        val wpIndex = (RunManager.getCurrentRun()?.waypoints?.size ?: 0) + 1
+        val currentRun = RunManager.getCurrentRun()
+        if (currentRun == null) {
+            Toast.makeText(requireContext(), "Fehler: Kein aktiver Run gefunden.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val wpIndex = currentRun.waypoints.size + 1
 
         val hit = WayPointHit(
             timestamp = System.currentTimeMillis(),
@@ -282,42 +294,40 @@ class MapFragment : Fragment() {
 
         RunManager.addWaypoint(hit)
 
+        val timeStr = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
+            .format(java.util.Date(hit.timestamp))
+
         // Marker setzen
         val point = GeoPoint(hit.latitude, hit.longitude)
         val marker = Marker(mapView).apply {
             position = point
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             title = "Waypoint #$wpIndex"
-            subDescription = "t=${hit.timestamp}"
+            subDescription = "t=$timeStr"
             icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_gt_waypoint)
-
         }
-
         mapView.overlays.add(marker)
-        // Polyline updaten
+
+        // Polyline updaten (zwischen den Waypoints)
         waypointPoints.add(point)
         waypointLine?.setPoints(waypointPoints)
 
         if (followMe) mapView.controller.animateTo(point)
 
         mapView.invalidate()
-
         Toast.makeText(requireContext(), "Wegpunkt gespeichert (#$wpIndex)", Toast.LENGTH_SHORT).show()
     }
 
-    private fun updateLiveMarker(loc: Location) {
-        val p = GeoPoint(loc.latitude, loc.longitude)
 
+    private fun updateLiveMarker(p: GeoPoint) {
         if (liveMarker == null) {
             liveMarker = Marker(mapView).apply {
                 position = p
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 title = "Aktuell"
-                icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_live_arrow)
             }
             mapView.overlays.add(liveMarker)
 
-            // Beim ersten Fix ggf. zentrieren
             if (followMe) {
                 mapView.controller.setZoom(18.0)
                 mapView.controller.setCenter(p)
@@ -326,9 +336,9 @@ class MapFragment : Fragment() {
             liveMarker!!.position = p
             if (followMe) mapView.controller.animateTo(p)
         }
-
         mapView.invalidate()
     }
+
 
     private fun startMapLocationUpdates() {
         val fine = ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)

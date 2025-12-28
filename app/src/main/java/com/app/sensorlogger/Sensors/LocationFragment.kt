@@ -38,7 +38,14 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.Date
 
+
 class LocationFragment : Fragment() {
+
+    private val sharedVM by lazy {
+        androidx.lifecycle.ViewModelProvider(requireActivity())
+            .get(com.app.sensorlogger.viewmodel.SharedLocationViewModel::class.java)
+    }
+
 
 
 
@@ -65,7 +72,7 @@ class LocationFragment : Fragment() {
         LocationServices.getFusedLocationProviderClient(requireContext())
     }
 
-    private var isLogging = false
+   // private var isLogging = false
 
     // hier sammeln wir ALLE GPS-Punkte dieser Session
    // private val loggedLocations = mutableListOf<LocationSample>()
@@ -77,22 +84,24 @@ class LocationFragment : Fragment() {
 
     private fun handleLocation(loc: Location) {
 
-        updateUiWithLocation(loc)
+        val sample = LocationSample(
+            timestamp = System.currentTimeMillis(),
+            latitude = loc.latitude,
+            longitude = loc.longitude,
+            accuracy = if (loc.hasAccuracy()) loc.accuracy else null,
+            altitude = if (loc.hasAltitude()) loc.altitude else null,
+            provider = loc.provider ?: ""
+        )
 
-        if (isLogging) {
-
-            RunManager.addLocation(
-                LocationSample(
-                    timestamp = System.currentTimeMillis(),
-                    latitude = loc.latitude,
-                    longitude = loc.longitude,
-                    accuracy = if (loc.hasAccuracy()) loc.accuracy else null,
-                    altitude = if (loc.hasAltitude()) loc.altitude else null,
-                    provider = loc.provider ?: ""
-                )
-            )
+        // 1) Immer speichern, wenn Run läuft
+        if (RunManager.isLogging) {
+            RunManager.addLocation(sample)
         }
+
+        // 2) Live an alle UIs senden
+        sharedVM.currentLocation.postValue(sample)
     }
+
 
 
     // Location Callback -> bekommt Updates vom FusedLocationProvider
@@ -150,46 +159,87 @@ class LocationFragment : Fragment() {
            .getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
 
+        sharedVM.currentLocation.observe(viewLifecycleOwner) { s ->
+
+            textLat.text = "Breite: %.6f".format(s.latitude)
+            textLng.text = "Länge: %.6f".format(s.longitude)
+
+            textAlt.text = if (s.altitude != null) {
+                "Höhe: %.1f m".format(s.altitude)
+            } else {
+                "Höhe: -- m"
+            }
+
+            textAcc.text = if (s.accuracy != null) {
+                "Genauigkeit: %.1f m".format(s.accuracy)
+            } else {
+                "Genauigkeit: -- m"
+            }
+
+            textProvider.text = "Provider: ${s.provider}"
+            textStatus.text = if (RunManager.isLogging) {
+                "Status: Logging läuft"
+            } else {
+                "Status: Standort empfangen"
+            }
+        }
+
 
 
 
        @SuppressLint("MissingPermission")
        btnRecord.setOnClickListener {
-           // Permission zuerst prüfen
-           if (ensureLocationPermission()) {
+           if (!ensureLocationPermission()) {
+               Toast.makeText(requireContext(), "Berechtigung benötigt…", Toast.LENGTH_SHORT).show()
+               return@setOnClickListener
+           }
 
-              // loggedLocations.clear()
-               //RunManager.clearAll()
+           val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
 
-               val route = RouteType.OUTDOOR //später dyanmic wählen
-               val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
-               val mode = prefs.getString("provieder_mode", "fused_high")
-               val providerVariant = when (mode) {
-                   "fused_balanced" -> ProviderVariant.FUSED_BALANCED
-                   "GPS" -> ProviderVariant.GPS
-                   "Network" -> ProviderVariant.Network
-                   else -> ProviderVariant.FUSED_HIGH
-               }
+           // robust: gleiche Strings egal wie gespeichert
+           val mode = prefs.getString("provieder_mode", "fused_high")?.lowercase()
 
+           val providerVariant = when (mode) {
+               "fused_balanced" -> ProviderVariant.FUSED_BALANCED
+               "gps" -> ProviderVariant.GPS
+               "netzwerk", "Network" -> ProviderVariant.NETWORK   // falls du NETWORK im Enum hast
+               else -> ProviderVariant.FUSED_HIGH
+           }
 
+           val route = when (prefs.getString("route_mode", "outdoor")?.lowercase()) {
+               "indoor" -> RouteType.INDOOR
+               else -> RouteType.OUTDOOR
+           }
+
+           if (!RunManager.isRunning()) {
                val run = RunManager.startNewRun(route, providerVariant)
-               isLogging = true
+
+               // START updates
                startSelectedProvider()
 
                textStatus.text = "Status: Run läuft (${run.runId.take(8)})"
-               Toast.makeText(requireContext(), "Run gestartet", Toast.LENGTH_SHORT).show()
-
-
+               Toast.makeText(
+                   requireContext(),
+                   "Run gestartet: ${route.name} / ${providerVariant.name}",
+                   Toast.LENGTH_SHORT
+               ).show()
 
            } else {
-               // wir haben gerade Permission angefragt -> User muss erst erlauben
-               Toast.makeText(requireContext(), "Berechtigung benötigt…", Toast.LENGTH_SHORT).show()
+               // RESUME
+               RunManager.resumeLogging()
+
+               // WICHTIG: Updates wieder starten!
+               startSelectedProvider()
+
+               val run = RunManager.getCurrentRun()
+               textStatus.text = "Status: Run läuft (${run?.runId?.take(8) ?: "?"})"
+               Toast.makeText(requireContext(), "Run fortgesetzt", Toast.LENGTH_SHORT).show()
            }
        }
 
 
-       btnPause.setOnClickListener {
-           isLogging = false
+        btnPause.setOnClickListener {
+           RunManager.pauseLogging()
            stopLocationUpdates()
            textStatus.text = "Status: angehalten"
            Toast.makeText(requireContext(), "Standort-Logging pausiert", Toast.LENGTH_SHORT).show()
@@ -214,24 +264,7 @@ class LocationFragment : Fragment() {
 
            Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
 
-           /*
-          val file = exportToCsv() //exportData
-           if (file != null) {
-               lastExportedFilePath = file.absolutePath  // <- jetzt ist file sicher non-null
-               Toast.makeText(
-                   requireContext(),
-                   "Exportiert nach: ${file.name}",
-                   Toast.LENGTH_LONG
-               ).show()
 
-               //wir merken den Pfad global, damit MapFragment ihn laden kann
-               saveLastExportPathForMap(file.absolutePath)
-           }else{
-
-               Toast.makeText(requireContext(), "Export fehlgeschlagen", Toast.LENGTH_SHORT).show()
-           }
-
-            */
        }
 
         return view
@@ -241,14 +274,17 @@ class LocationFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         // Falls du willst dass bei Zurückkommen weiter aufgenommen wird:
-        if (isLogging && ensureLocationPermission()) {
+        if (RunManager.isLogging && ensureLocationPermission()) {
             startSelectedProvider()
         }
     }
 
     override fun onPause() {
         super.onPause()
-        stopLocationUpdates()
+        if (!RunManager.isLogging) {
+            stopLocationUpdates()
+        }
+       // stopLocationUpdates()
     }
 
     // UI aktualisieren
@@ -294,7 +330,7 @@ class LocationFragment : Fragment() {
             1000L // gewünschtes Intervall ~1 Sekunde
         )
             .setMinUpdateIntervalMillis(500L) // früheste Rate
-            .setWaitForAccurateLocation(true)
+            .setWaitForAccurateLocation(false)
             .build()
 
         if (!ensureLocationPermission()) return

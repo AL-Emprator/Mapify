@@ -11,6 +11,10 @@ object RunManager {
     private var currentRun: RunSession? = null
     private val allRuns: MutableList<RunSession> = mutableListOf()
 
+    // NEW: echter Status
+    var isLogging: Boolean = false
+        private set
+
     fun startNewRun(route: RouteType, providerVariant: ProviderVariant): RunSession {
         val run = RunSession(
             runId = UUID.randomUUID().toString(),
@@ -20,19 +24,32 @@ object RunManager {
         )
         currentRun = run
         allRuns.add(run)
+        isLogging = true
         return run
     }
 
+    // NEW: pausieren ohne Run zu beenden
+    fun pauseLogging() {
+        isLogging = false
+    }
+
+    // NEW: weiterlaufen lassen (wenn Run existiert)
+    fun resumeLogging() {
+        if (currentRun != null) isLogging = true
+    }
+
+    // Run wirklich beenden
     fun stopRun() {
         currentRun?.endTime = System.currentTimeMillis()
         currentRun = null
+        isLogging = false
     }
 
     fun isRunning(): Boolean = currentRun != null
     fun getCurrentRun(): RunSession? = currentRun
 
     fun addLocation(sample: LocationSample) {
-        currentRun?.locations?.add(sample)
+        if (isLogging) currentRun?.locations?.add(sample)
     }
 
     fun addWaypoint(hit: WayPointHit) {
@@ -44,5 +61,7 @@ object RunManager {
     fun clearAll() {
         currentRun = null
         allRuns.clear()
+        isLogging = false
     }
 }
+
