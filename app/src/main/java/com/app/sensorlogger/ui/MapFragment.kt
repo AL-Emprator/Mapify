@@ -49,9 +49,10 @@ class MapFragment : Fragment() {
 
     private var lastLocation: Location? = null
     private var liveMarker: Marker? = null
-
     private val waypointPoints = mutableListOf<GeoPoint>()
     private var waypointLine: Polyline? = null
+
+
 
 
     private val fusedCallback = object : LocationCallback() {
@@ -80,6 +81,46 @@ class MapFragment : Fragment() {
         mapView.setMultiTouchControls(true)
         mapView.controller.setZoom(18.0)
 
+
+        //Test Strecken
+
+
+        // ====== Groundtruth Route 1 (Outdoor) ======
+        val route1 = listOf(
+            GeoPoint(51.4844379894976, 7.060285724536129),
+            GeoPoint(51.48471362598386, 7.060813262078964),  // P1
+            GeoPoint(51.485084332675434, 7.061546085811344), // P2
+            GeoPoint(51.485271151986396, 7.0619533845546965),// P3 (links abbiegen)
+            GeoPoint(51.48588703208569, 7.061791372110737)   // P4
+        )
+
+
+        // ====== Groundtruth Route 2 (Indoor) ======
+        val route2Indoor = listOf(
+
+            GeoPoint(51.4844379894976, 7.060285724536129), // I1 Eingang (Tür)
+            GeoPoint( 51.48441383546118, 7.060259877688737), // I2 Flur (nach ~20-30s)
+            GeoPoint(51.484389198746356, 7.0602934052979345), // I3 Ecke / Abbiegen ,
+            GeoPoint(51.484380012171314, 7.060261218793105), // I4 nach Abbiegen ,
+            GeoPoint(51.484395044747686, 7.060233726153564), // I5 Treppe/Stockwerkwechsel (optional) ,
+            GeoPoint(51.484395879890684, 7.060180752531034), // I6 Flur ,
+
+        )
+
+
+
+        mapView.controller.setCenter(route1.first())
+
+
+        //TestStrecken
+        drawRoute(route1, android.graphics.Color.BLUE, "Groundtruth Route 1 (Outdoor)")
+        drawMarkers(route1, " O ")
+
+        drawRoute(route2Indoor, android.graphics.Color.YELLOW, "Groundtruth Route 2 (Indoor)")
+        drawMarkers(route2Indoor, " I ")
+
+
+        //Wegpunkte poyline bei button
         waypointLine = Polyline().apply {
             title = "Waypoints"
             outlinePaint.strokeWidth = 6f
@@ -91,13 +132,18 @@ class MapFragment : Fragment() {
 // Bereits vorhandene Waypoints (aus aktuellem Run oder letztem Run) wiederherstellen
         restoreWaypointsOnMap()
 
-        // Route aus letzter exportierter CSV zeichnen
+        // Route aus letzter exportierter CSV zeichnen von sensoren
         val measuredPoints = loadPathFromLastExport()
         if (measuredPoints.isNotEmpty()) {
             val polyline = Polyline().apply {
                 setPoints(measuredPoints)
-                title = "Messroute"
+                    title = "Messroute"
+                    outlinePaint.color = android.graphics.Color.RED
+                    outlinePaint.strokeWidth = 4f
+
             }
+
+
             mapView.overlays.add(polyline)
 
             val startMarker = Marker(mapView).apply {
@@ -243,6 +289,8 @@ class MapFragment : Fragment() {
             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
             title = "Waypoint #$wpIndex"
             subDescription = "t=${hit.timestamp}"
+            icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_gt_waypoint)
+
         }
 
         mapView.overlays.add(marker)
@@ -265,6 +313,7 @@ class MapFragment : Fragment() {
                 position = p
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 title = "Aktuell"
+                icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_live_arrow)
             }
             mapView.overlays.add(liveMarker)
 
@@ -341,4 +390,32 @@ class MapFragment : Fragment() {
         }
         return points
     }
+
+    private fun drawRoute(points: List<GeoPoint>, color: Int, title: String) {
+        val line = Polyline().apply {
+            setPoints(points)
+            this.title = title
+            outlinePaint.color = color
+            outlinePaint.strokeWidth = 8f
+        }
+        mapView.overlays.add(line)
+        mapView.invalidate()
+    }
+
+
+
+
+    private fun drawMarkers(points: List<GeoPoint>, prefix: String) {
+        points.forEachIndexed { index, geo ->
+            val m = Marker(mapView).apply {
+                position = geo
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                title = "${prefix}${index + 1}"
+                icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_measured_point)
+            }
+            mapView.overlays.add(m)
+        }
+        mapView.invalidate()
+    }
+
 }
