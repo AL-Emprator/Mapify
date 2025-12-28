@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.provider.CalendarContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,6 +50,10 @@ class MapFragment : Fragment() {
     private var lastLocation: Location? = null
     private var liveMarker: Marker? = null
 
+    private val waypointPoints = mutableListOf<GeoPoint>()
+    private var waypointLine: Polyline? = null
+
+
     private val fusedCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
             val loc = result.lastLocation ?: return
@@ -75,7 +80,18 @@ class MapFragment : Fragment() {
         mapView.setMultiTouchControls(true)
         mapView.controller.setZoom(18.0)
 
-        // Route aus letzter exportierter CSV zeichnen (optional)
+        waypointLine = Polyline().apply {
+            title = "Waypoints"
+            outlinePaint.strokeWidth = 6f
+            // outlinePaint.color = ... (optional)
+            outlinePaint.color = android.graphics.Color.GREEN
+        }
+        mapView.overlays.add(waypointLine)
+
+// Bereits vorhandene Waypoints (aus aktuellem Run oder letztem Run) wiederherstellen
+        restoreWaypointsOnMap()
+
+        // Route aus letzter exportierter CSV zeichnen
         val measuredPoints = loadPathFromLastExport()
         if (measuredPoints.isNotEmpty()) {
             val polyline = Polyline().apply {
@@ -143,6 +159,44 @@ class MapFragment : Fragment() {
         mapView.onPause()
     }
 
+    private fun restoreWaypointsOnMap() {
+        // Nimm aktuellen Run, sonst den letzten
+        val run = RunManager.getCurrentRun() ?: RunManager.getRuns().lastOrNull()
+        val waypoints = run?.waypoints.orEmpty()
+
+        if (waypoints.isEmpty()) return
+
+        // Doppelte Einträge vermeiden, falls restore mehrfach aufgerufen wird
+        waypointPoints.clear()
+
+        // Optional: alte WP-Marker entfernen (falls du schon welche hast)
+        // Wir entfernen nur Marker, die mit "Waypoint #" anfangen
+        mapView.overlays.removeAll { ov ->
+            (ov is Marker) && (ov.title?.startsWith("Waypoint #") == true)
+        }
+
+        waypoints.forEachIndexed { index, wp ->
+            val point = GeoPoint(wp.latitude, wp.longitude)
+            waypointPoints.add(point)
+
+            val marker = Marker(mapView).apply {
+                position = point
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                title = "Waypoint #${index + 1}"
+                subDescription = "t=${wp.timestamp}"
+            }
+            mapView.overlays.add(marker)
+        }
+
+        // Polyline aktualisieren
+        waypointLine?.setPoints(waypointPoints)
+
+        // Kamera auf letzten Waypoint
+        mapView.controller.animateTo(waypointPoints.last())
+        mapView.invalidate()
+    }
+
+
     private fun onSaveWaypointClicked() {
         val loc = lastLocation
         if (loc == null) {
@@ -192,6 +246,9 @@ class MapFragment : Fragment() {
         }
 
         mapView.overlays.add(marker)
+        // Polyline updaten
+        waypointPoints.add(point)
+        waypointLine?.setPoints(waypointPoints)
 
         if (followMe) mapView.controller.animateTo(point)
 
