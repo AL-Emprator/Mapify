@@ -49,7 +49,7 @@
                     android:id="@+id/textViewb"
                     style="@style/DashboardRowTextStyle"
                     android:layout_weight="1"
-                    android:text="Timestamp" />
+                    android:text=" " />
             </LinearLayout>
 
             <!-- Breitengrad -->
@@ -66,7 +66,7 @@
                     android:id="@+id/textViewl"
                     style="@style/DashboardRowTextStyle"
                     android:layout_weight="1"
-                    android:text="Timestamp" />
+                    android:text=" " />
             </LinearLayout>
 
             <!-- Höhe -->
@@ -83,7 +83,7 @@
                     android:id="@+id/textViewh"
                     style="@style/DashboardRowTextStyle"
                     android:layout_weight="1"
-                    android:text="Timestamp" />
+                    android:text=" " />
             </LinearLayout>
 
             <!-- Genauigkeit -->
@@ -99,7 +99,7 @@
                     android:id="@+id/textViewg"
                     style="@style/DashboardRowTextStyle"
                     android:layout_weight="1"
-                    android:text="Timestamp" />
+                    android:text=" " />
             </LinearLayout>
 
             <!-- Provider -->
@@ -108,9 +108,7 @@
                     android:id="@+id/textprovider"
                     style="@style/DashboardRowTextStyle"
                     android:text="Provider: --"/>
-                <ImageView
-                    style="@style/DashboardRowChevronStyle"
-                    android:src="@drawable/ic_chevron_right"/>
+
             </LinearLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

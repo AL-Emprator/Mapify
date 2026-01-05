@@ -8,8 +8,8 @@ enum class ProviderVariant { FUSED_HIGH, FUSED_BALANCED, GPS, NETWORK }
 data class RunSession (
 
     val runId: String,
-    val route: RouteType,
-    val providerVariant: ProviderVariant,
+    var route: RouteType,
+    var providerVariant: ProviderVariant,
     val startTime: Long,
     var endTime: Long? = null,
     val locations: MutableList<LocationSample> = mutableListOf(),

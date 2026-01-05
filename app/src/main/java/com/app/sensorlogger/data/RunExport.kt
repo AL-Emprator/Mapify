@@ -32,7 +32,7 @@ object RunExport {
         val wpOk = writeWaypoints(waypointsFile, run)
 
         // Pfade merken (für MapFragment Laden)
-        val prefs = context.getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
+        val prefs = context.getSharedPreferences(Prefs.PREFS_NAME, Context.MODE_PRIVATE)
         if (locOk) prefs.edit().putString("last_gps_csv_path", locationsFile.absolutePath).apply()
         if (wpOk) prefs.edit().putString("last_waypoints_csv_path", waypointsFile.absolutePath).apply()
 

@@ -6,12 +6,13 @@ import com.app.sensorlogger.model.RouteType
 import com.app.sensorlogger.model.RunSession
 import com.app.sensorlogger.model.WayPointHit
 
+// RunManager.kt
+
 object RunManager {
 
     private var currentRun: RunSession? = null
     private val allRuns: MutableList<RunSession> = mutableListOf()
 
-    // NEW: echter Status
     var isLogging: Boolean = false
         private set
 
@@ -28,17 +29,20 @@ object RunManager {
         return run
     }
 
-    // NEW: pausieren ohne Run zu beenden
     fun pauseLogging() {
         isLogging = false
     }
 
-    // NEW: weiterlaufen lassen (wenn Run existiert)
     fun resumeLogging() {
         if (currentRun != null) isLogging = true
     }
 
-    // Run wirklich beenden
+    // ✅ NEU: Beim Resume aktuelle Settings in den bestehenden Run übernehmen
+    fun updateCurrentRunConfig(route: RouteType, providerVariant: ProviderVariant) {
+        currentRun?.route = route
+        currentRun?.providerVariant = providerVariant
+    }
+
     fun stopRun() {
         currentRun?.endTime = System.currentTimeMillis()
         currentRun = null
@@ -64,4 +68,5 @@ object RunManager {
         isLogging = false
     }
 }
+
 

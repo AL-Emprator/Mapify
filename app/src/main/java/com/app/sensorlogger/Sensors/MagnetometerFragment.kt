@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.app.sensorlogger.R
 import com.app.sensorlogger.Sensors.GyroscopeFragment.SensorSample
+import com.app.sensorlogger.data.Prefs
 import com.google.android.material.slider.Slider
 import java.io.File
 import java.io.FileWriter
@@ -83,28 +84,28 @@ class MagnetometerFragment : Fragment(), SensorEventListener {
         magnetometer = sensorManager?.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
 
         // ==== Globale Einstellungen laden ====
-        val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences(Prefs.PREFS_NAME, Context.MODE_PRIVATE)
 
 
         // Samplingrate aus Settings laden (Standard 1.0 Hz)
-        val defaultRateHz = prefs.getFloat("default_sampling_rate", 1.0f)
+        val defaultRateHz = prefs.getFloat(Prefs.KEY_DEFAULT_RATE, 1.0f)
         currentFreqHz = defaultRateHz
         slider.value = currentFreqHz
         updateFreqLabel()
 
         // 2Autostart laden
-        val autoStartEnabled = prefs.getBoolean("autostart_logging", false)
+        val autoStartEnabled = prefs.getBoolean(Prefs.KEY_AUTOSTART_LOGGING, false)
 
 
         // Maximale Aufnahmedauer laden
-        val maxSessionMinutes = prefs.getInt("max_session_duration", 0)
+        val maxSessionMinutes = prefs.getInt(Prefs.KEY_MAX_SESSION, 0)
 
 
 
         slider.addOnChangeListener { _, value, _ ->
             currentFreqHz = value
             updateFreqLabel()
-            prefs.edit().putFloat("default_sampling_rate", value).apply()
+            prefs.edit().putFloat(Prefs.KEY_DEFAULT_RATE, value).apply()
         }
 
         minusBtn.setOnClickListener {
@@ -234,12 +235,12 @@ class MagnetometerFragment : Fragment(), SensorEventListener {
 
 
     private fun exportData() {
-        val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
-        val mode = prefs.getString("storage_mode", "csv")
+        val prefs = requireContext().getSharedPreferences(Prefs.PREFS_NAME, Context.MODE_PRIVATE)
+        val mode = prefs.getString(Prefs.KEY_STORAGE_MODE, Prefs.MODE_CSV)
 
         when (mode) {
-            "cloud" -> exportToCloud()
-            "json"  -> exportToJson()
+            Prefs.MODE_CLOUD -> exportToCloud()
+           Prefs.MODE_JSON  -> exportToJson()
             else    -> exportToCsv()
         }
     }

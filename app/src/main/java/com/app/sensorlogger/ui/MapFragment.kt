@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.app.sensorlogger.R
+import com.app.sensorlogger.data.Prefs
 import com.app.sensorlogger.data.RunExport
 import com.app.sensorlogger.data.RunManager
 import com.app.sensorlogger.model.ProviderVariant
@@ -142,7 +143,7 @@ class MapFragment : Fragment() {
         mapView.overlays.add(waypointLine)
 
       // Bereits vorhandene Waypoints (aus aktuellem Run oder letztem Run) wiederherstellen
-        restoreWaypointsOnMap()
+        //restoreWaypointsOnMap()
 
         // Route aus letzter exportierter CSV zeichnen von sensoren
         val measuredPoints = loadPathFromLastExport()
@@ -382,7 +383,7 @@ class MapFragment : Fragment() {
 
     // liest die NEUSTE locations_*.csv (Pfad in last_gps_csv_path) und baut GeoPoints
     private fun loadPathFromLastExport(): List<GeoPoint> {
-        val prefs = requireContext().getSharedPreferences("sensorlogger_prefs", Context.MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences(Prefs.PREFS_NAME, Context.MODE_PRIVATE)
         val path = prefs.getString("last_gps_csv_path", null) ?: return emptyList()
 
         val file = File(path)

@@ -12,6 +12,7 @@ import android.widget.Switch
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.app.sensorlogger.R
+import com.app.sensorlogger.data.Prefs
 
 class SettingsFragment : Fragment() {
 
@@ -37,6 +38,7 @@ class SettingsFragment : Fragment() {
     private lateinit var  outdoor_mode: RadioButton
     private lateinit var  indoor_mode: RadioButton
 
+    /*
     // Name für SharedPreferences
     private val PREFS_NAME = "sensorlogger_prefs"
 
@@ -68,7 +70,7 @@ class SettingsFragment : Fragment() {
     private val KEY_ROUTE_MODE = "route_mode"
     private val MODE_OUTDOOR = "outdoor"
     private val MODE_INDOOR = "indoor"
-
+*/
 
 
     override fun onCreateView(
@@ -109,7 +111,7 @@ class SettingsFragment : Fragment() {
 
 
         // SharedPreferences holen
-        val prefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = requireContext().getSharedPreferences(Prefs.PREFS_NAME, Context.MODE_PRIVATE)
 
         // ------- Initialzustand aus Prefs laden -------
 
@@ -118,38 +120,38 @@ class SettingsFragment : Fragment() {
         //switchReleaseNotes.isChecked = showNotes
 
         // 2. Speichermodus (CSV default)
-        val storageMode = prefs.getString(KEY_STORAGE_MODE, MODE_CSV)
+        val storageMode = prefs.getString(Prefs.KEY_STORAGE_MODE, Prefs.MODE_CSV)
         when (storageMode) {
-            MODE_CLOUD -> radioCloud.isChecked = true
-            MODE_JSON -> radioJson.isChecked = true
+            Prefs.MODE_CLOUD -> radioCloud.isChecked = true
+            Prefs.MODE_JSON -> radioJson.isChecked = true
             else -> radioCsv.isChecked = true
         }
 
 
         //3. Provieder Posistion (FUSED default)
-        val providerMode = prefs.getString(KEY_PROVIEDER_MODE, MODE_FUSED_HIGH)
+        val providerMode = prefs.getString(Prefs.KEY_PROVIDER_MODE, Prefs.MODE_FUSED_HIGH)
         when(providerMode) {
-            MODE_GPS -> radiogps.isChecked = true
-            MODE_NETZ -> radionetz.isChecked = true
-            MODE_FUSED_BALANCED -> radioblanced.isChecked = true //Balnced
+            Prefs.MODE_GPS -> radiogps.isChecked = true
+            Prefs.MODE_NETWORK -> radionetz.isChecked = true
+            Prefs.MODE_FUSED_BALANCED -> radioblanced.isChecked = true //Balnced
             else -> radiofused.isChecked = true //High defualt
         }
 
 
-        val routemode = prefs.getString(KEY_ROUTE_MODE, MODE_OUTDOOR)
+        val routemode = prefs.getString(Prefs.KEY_ROUTE_MODE, Prefs.MODE_OUTDOOR)
         when(routemode) {
-                MODE_INDOOR -> indoor_mode.isChecked = true
+                Prefs.MODE_INDOOR -> indoor_mode.isChecked = true
                 else -> outdoor_mode.isChecked = true
 
         }
 
-        val defaultRate = prefs.getFloat(KEY_DEFAULT_RATE, 1.0f)
+        val defaultRate = prefs.getFloat(Prefs.KEY_DEFAULT_RATE, 1.0f)
         textDefaultRateValue.text = "${defaultRate} Hz"
 
-        val autostart = prefs.getBoolean(KEY_AUTOSTART_LOGGING, false)
+        val autostart = prefs.getBoolean(Prefs.KEY_AUTOSTART_LOGGING, false)
         switchAutoStart.isChecked = autostart
 
-        val maxSession = prefs.getInt(KEY_MAX_SESSION, 0)
+        val maxSession = prefs.getInt(Prefs.KEY_MAX_SESSION, 0)
         textMaxSessionValue.text = if (maxSession == 0) "Unbegrenzt" else "$maxSession min"
 
 
@@ -172,13 +174,13 @@ class SettingsFragment : Fragment() {
         // Speichermodus ändern
         radioGroupStorage.setOnCheckedChangeListener { _, checkedId ->
             val mode = when (checkedId) {
-                R.id.radio_cloud -> MODE_CLOUD
-                R.id.radio_json -> MODE_JSON
-                else -> MODE_CSV
+                R.id.radio_cloud -> Prefs.MODE_CLOUD
+                R.id.radio_json -> Prefs.MODE_JSON
+                else -> Prefs.MODE_CSV
             }
 
             prefs.edit()
-                .putString(KEY_STORAGE_MODE, mode)
+                .putString(Prefs.KEY_STORAGE_MODE, mode)
                 .apply()
         }
 
@@ -187,14 +189,14 @@ class SettingsFragment : Fragment() {
 
             val mode = when (checkedId) {
 
-                R.id.radio_gps -> MODE_GPS
-                R.id.radio_netz -> MODE_NETZ
-                R.id.radio_balanced -> MODE_FUSED_BALANCED
-                else -> MODE_FUSED_HIGH
+                R.id.radio_gps -> Prefs.MODE_GPS
+                R.id.radio_netz -> Prefs.MODE_NETWORK
+                R.id.radio_balanced -> Prefs.MODE_FUSED_BALANCED
+                else -> Prefs.MODE_FUSED_HIGH
             }
 
             prefs.edit()
-                .putString(KEY_PROVIEDER_MODE, mode)
+                .putString(Prefs.KEY_PROVIDER_MODE, mode)
                 .apply()
 
 
@@ -203,17 +205,17 @@ class SettingsFragment : Fragment() {
         radioGroupRoute.setOnCheckedChangeListener { _, checkedId ->
 
             val mode = when (checkedId) {
-                R.id.radio_route_indoor -> MODE_INDOOR
-                else -> MODE_OUTDOOR
+                R.id.radio_route_indoor -> Prefs.MODE_INDOOR
+                else -> Prefs.MODE_OUTDOOR
             }
 
             prefs.edit()
-                .putString(KEY_ROUTE_MODE, mode)
+                .putString(Prefs.KEY_ROUTE_MODE, mode)
                 .apply()
         }
 
         switchAutoStart.setOnCheckedChangeListener { _, enabled ->
-            prefs.edit().putBoolean(KEY_AUTOSTART_LOGGING, enabled).apply()
+            prefs.edit().putBoolean(Prefs.KEY_AUTOSTART_LOGGING, enabled).apply()
         }
 
         view.findViewById<View>(R.id.row_default_rate).setOnClickListener {
@@ -233,7 +235,7 @@ class SettingsFragment : Fragment() {
         val options = arrayOf("Unbegrenzt", "1 Minute", "5 Minuten", "10 Minuten", "30 Minuten")
         val values = arrayOf(0, 1, 5, 10, 30)
 
-        val current = prefs.getInt(KEY_MAX_SESSION, 0)
+        val current = prefs.getInt(Prefs.KEY_MAX_SESSION, 0)
         var selectedIndex = values.indexOf(current)
         if (selectedIndex == -1) selectedIndex = 0
 
@@ -241,7 +243,7 @@ class SettingsFragment : Fragment() {
             .setTitle("Maximale Aufnahmedauer")
             .setSingleChoiceItems(options, selectedIndex) { dialog, which ->
                 val newValue = values[which]
-                prefs.edit().putInt(KEY_MAX_SESSION, newValue).apply()
+                prefs.edit().putInt(Prefs.KEY_MAX_SESSION, newValue).apply()
                 textMaxSessionValue.text =
                     if (newValue == 0) "Unbegrenzt" else "$newValue min"
                 dialog.dismiss()
@@ -253,7 +255,7 @@ class SettingsFragment : Fragment() {
         val rates = arrayOf("0.5 Hz", "1.0 Hz", "2.0 Hz", "5.0 Hz", "10.0 Hz")
         val rateValues = arrayOf(0.5f, 1.0f, 2.0f, 5.0f, 10.0f)
 
-        val current = prefs.getFloat(KEY_DEFAULT_RATE, 1.0f)
+        val current = prefs.getFloat(Prefs.KEY_DEFAULT_RATE, 1.0f)
         var selectedIndex = rateValues.indexOf(current)
         if (selectedIndex == -1) selectedIndex = 1
 
@@ -261,7 +263,7 @@ class SettingsFragment : Fragment() {
             .setTitle("Samplingrate auswählen")
             .setSingleChoiceItems(rates, selectedIndex) { dialog, which ->
                 val newRate = rateValues[which]
-                prefs.edit().putFloat(KEY_DEFAULT_RATE, newRate).apply()
+                prefs.edit().putFloat(Prefs.KEY_DEFAULT_RATE, newRate).apply()
                 textDefaultRateValue.text = "${newRate} Hz"
                 dialog.dismiss()
             }
