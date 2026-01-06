@@ -33,6 +33,9 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import java.io.File
+import org.osmdroid.views.overlay.Overlay
+import android.graphics.Color
+
 
 class MapFragment : Fragment() {
 
@@ -41,6 +44,7 @@ class MapFragment : Fragment() {
             .get(com.app.sensorlogger.viewmodel.SharedLocationViewModel::class.java)
     }
 
+    private val runOverlays = mutableListOf<Overlay>()
 
     private lateinit var mapView: MapView
     private lateinit var btnWaypoint: ImageButton
@@ -147,6 +151,11 @@ class MapFragment : Fragment() {
 
         // Route aus letzter exportierter CSV zeichnen von sensoren
         val measuredPoints = loadPathFromLastExport()
+
+        //Vor dem Zeichnen alte Run-Overlays entfernen
+
+        clearRunOverlays()
+
         if (measuredPoints.isNotEmpty()) {
             val polyline = Polyline().apply {
                 setPoints(measuredPoints)
@@ -157,7 +166,8 @@ class MapFragment : Fragment() {
             }
 
 
-            mapView.overlays.add(polyline)
+           mapView.overlays.add(polyline)
+            runOverlays.add(polyline)
 
             val startMarker = Marker(mapView).apply {
                 position = measuredPoints.first()
@@ -166,6 +176,7 @@ class MapFragment : Fragment() {
                 icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_start_green)
             }
             mapView.overlays.add(startMarker)
+            runOverlays.add(startMarker)
 
             val endMarker = Marker(mapView).apply {
                 position = measuredPoints.last()
@@ -174,8 +185,11 @@ class MapFragment : Fragment() {
                 icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_end_red)
             }
             mapView.overlays.add(endMarker)
+            runOverlays.add(endMarker)
 
             mapView.controller.setCenter(measuredPoints.last())
+            mapView.invalidate()
+
         } else {
             // Fallback Center (wird später durch GPS ersetzt)
             mapView.controller.setCenter(GeoPoint(48.1351, 11.5820))
@@ -198,6 +212,23 @@ class MapFragment : Fragment() {
                 append("Waypoints: ${result.waypointsFile?.name ?: "FEHLT"}")
             }
             Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show()
+
+
+            //Nach Export: Map neu laden/zeichnen
+            val pts = loadPathFromLastExport()
+            clearRunOverlays()
+            if (pts.isNotEmpty()) {
+                val poly = Polyline().apply {
+                    setPoints(pts)
+                    outlinePaint.color = Color.RED
+                    outlinePaint.strokeWidth = 4f
+                }
+                mapView.overlays.add(poly)
+                runOverlays.add(poly)
+                mapView.controller.setCenter(pts.last())
+                mapView.invalidate()
+            }
+
         }
 
 
@@ -212,6 +243,15 @@ class MapFragment : Fragment() {
 
         return view
     }
+
+
+    private fun clearRunOverlays() {
+        // Entfernt nur die Overlays, die wir für die Run-Darstellung hinzugefügt haben
+        mapView.overlays.removeAll(runOverlays)
+        runOverlays.clear()
+        mapView.invalidate()
+    }
+
 
     override fun onResume() {
         super.onResume()
